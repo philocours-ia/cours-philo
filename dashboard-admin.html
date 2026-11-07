@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>PHILOCOURS IA</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+
+<style>
+
+:root{
+--blue:#0D1B2A;
+--blue2:#1B263B;
+--gold:#D4AF37;
+--success:#166534;
+--danger:#991B1B;
+}
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+font-family:Inter,sans-serif;
+background:linear-gradient(
+135deg,
+var(--blue),
+var(--blue2)
+);
+color:white;
+min-height:100vh;
+}
+
+.container{
+width:min(1200px,90%);
+margin:auto;
+padding:40px 0;
+}
+
+.hero{
+text-align:center;
+padding:50px 0;
+}
+
+.hero h1{
+font-family:Playfair Display,serif;
+font-size:4rem;
+color:var(--gold);
+margin-bottom:20px;
+}
+
+.hero p{
+max-width:700px;
+margin:auto;
+line-height:1.8;
+}
+
+.actions{
+margin-top:35px;
+display:flex;
+justify-content:center;
+gap:15px;
+flex-wrap:wrap;
+}
+
+button{
+background:var(--gold);
+border:none;
+padding:12px 25px;
+border-radius:10px;
+cursor:pointer;
+font-weight:bold;
+}
+
+button:hover{
+opacity:.9;
+}
+
+.card{
+background:rgba(255,255,255,.08);
+backdrop-filter:blur(10px);
+padding:25px;
+border-radius:15px;
+margin-bottom:25px;
+}
+
+.hidden{
+display:none;
+}
+
+label{
+display:block;
+margin-bottom:15px;
+}
+
+input,
+select{
+width:100%;
+padding:10px;
+border:none;
+border-radius:8px;
+margin-top:6px;
+}
+
+.error-box{
+background:var(--danger);
+padding:15px;
+border-radius:10px;
+margin-bottom:15px;
+}
+
+.success{
+background:var(--success);
+padding:15px;
+border-radius:10px;
+margin-top:15px;
+}
+
+.info{
+border-left:4px solid var(--gold);
+padding-left:15px;
+margin:15px 0;
+}
+
+footer{
+margin-top:40px;
+text-align:center;
+opacity:.8;
+padding-bottom:40px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="hero">
+
+<h1>PHILOCOURS IA</h1>
+
+<p>
+
+La philosophie intelligente au service
+de votre réussite scolaire.
+
+Plateforme ouverte de Septembre à Juillet,
+de 07h00 à 22h30.
+
+</p>
+
+<div class="actions">
+
+<button
+onclick="showSection('inscription')">
+
+📝 S'inscrire
+
+</button>
+
+<button
+onclick="showSection('connexion')">
+
+🔐 Se connecter
+
+</button>
+
+</div>
+
+</div>
+
+<!-- INSCRIPTION -->
+
+<div
+id="inscription"
+class="card hidden">
+
+<h2>Inscription</h2>
+
+<div id="errors"></div>
+
+<label>
+Nom
+<input id="nom">
+</label>
+
+<label>
+Prénom
+<input id="prenom">
+</label>
+
+<label>
+Sexe
+
+<select id="sexe">
+
+<option value="M">
+Masculin
+</option>
+
+<option value="F">
+Féminin
+</option>
+
+</select>
+
+</label>
+
+<label>
+Date de naissance
+<input
+type="date"
+id="date_naissance">
+</label>
+
+<label>
+Téléphone
+<input id="telephone">
+</label>
+
+<label>
+Email
+<input
+type="email"
+id="email">
+</label>
+
+<label>
+Classe
+
+<select id="classe">
+
+<option value="Premiere">
+Première
+</option>
+
+<option value="Terminale">
+Terminale
+</option>
+
+</select>
+
+</label>
+
+<label>
+Photo d'identité
+
+<input
+type="file"
+accept="image/*"
+id="photo">
+
+</label>
+
+<div class="info">
+
+<h3>Adhésion</h3>
+
+<p>
+Montant : 10 000 Ar / mois
+</p>
+
+<p>
+MVola :
++261385528349
+</p>
+
+<p>
+Bénéficiaire :
+Nasandratriniaina Julio
+</p>
+
+<p>
+Référence obligatoire :
+PHILOCOURS
+</p>
+
+</div>
+
+<label>
+Référence utilisée
+
+<input
+id="reference"
+placeholder="PHILOCOURS">
+</label>
+
+<label>
+Numéro de transaction
+
+<input
+id="transaction">
+</label>
+
+<button
+onclick="inscrireEleve()">
+
+Valider mon inscription
+
+</button>
+
+<div id="success"></div>
+
+</div>
+
+<!-- CONNEXION -->
+
+<div
+id="connexion"
+class="card hidden">
+
+<h2>Connexion</h2>
+
+<p>
+
+Votre ticket doit être activé
+par l'administrateur avant
+la première connexion.
+
+</p>
+
+<br>
+
+<label>
+
+Ticket
+
+<input
+id="loginTicket"
+placeholder="PH-T-12345678">
+
+</label>
+
+<button
+onclick="connexion()">
+
+Se connecter
+
+</button>
+
+</div>
+
+<!-- TABLEAU DE BORD -->
+
+<div
+id="dashboard"
+class="card hidden">
+
+<h2>
+
+Bienvenue dans votre espace
+
+</h2>
+
+<br>
+
+<p>
+
+Nom :
+<span id="nomUtilisateur">
+-
+</span>
+
+</p>
+
+<br>
+
+<div class="actions">
+
+<button>
+📚 Mes cours
+</button>
+
+<button>
+📂 Ressources
+</button>
+
+<button>
+📝 Exercices
+</button>
+
+<button>
+📊 Résultats
+</button>
+
+<button>
+👤 Profil
+</button>
+
+</div>
+
+</div>
+
+<footer>
+
+PHILOCOURS IA © 2026
+
+<br><br>
+
+Ouverture :
+07h00 - 22h30
+
+<br>
+
+Fermeture annuelle :
+Août
+
+</footer>
+
+</div>
+
+<script>
+
+function showSection(section){
+
+document
+.getElementById("inscription")
+.classList.add("hidden");
+
+document
+.getElementById("connexion")
+.classList.add("hidden");
+
+document
+.getElementById(section)
+.classList.remove("hidden");
+
+}
+
+async function connexion(){
+
+const ticket =
+document
+.getElementById(
+"loginTicket"
+)
+.value
+.trim();
+
+if(ticket===""){
+
+alert(
+"Veuillez saisir votre ticket."
+);
+
+return;
+
+}
+
+if(
+typeof loginEleve
+!== "function"
+){
+
+alert(
+"auth.js non chargé."
+);
+
+return;
+
+}
+
+const ok =
+await loginEleve(ticket);
+
+if(!ok){
+return;
+}
+
+const user =
+utilisateurCourant();
+
+if(user){
+
+document
+.getElementById(
+"nomUtilisateur"
+)
+.textContent =
+user.nom +
+" " +
+user.prenom;
+
+}
+
+document
+.getElementById(
+"dashboard"
+)
+.classList.remove(
+"hidden"
+);
+
+window.scrollTo({
+top:
+document.body.scrollHeight,
+behavior:"smooth"
+});
+
+}
+
+</script>
+
+<!-- SUPABASE -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- JS APP -->
+
+<script src="js/utils.js"></script>
+
+<script src="js/auth.js"></script>
+
+<script src="js/inscription.js"></script>
+
+</body>
+
+</html>
