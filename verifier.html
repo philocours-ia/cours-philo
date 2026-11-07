@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Vérification Carte PHILOCOURS IA</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+
+body{
+    margin:0;
+    font-family:Inter,sans-serif;
+    background:#0D1B2A;
+    color:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+}
+
+.card{
+    width:600px;
+    max-width:95%;
+    background:#1B263B;
+    border-radius:20px;
+    padding:30px;
+}
+
+h1{
+    color:#D4AF37;
+}
+
+.ticket{
+    font-size:28px;
+    font-weight:bold;
+    color:#D4AF37;
+}
+
+.success{
+    background:#14532d;
+    padding:15px;
+    border-radius:10px;
+    margin-top:20px;
+}
+
+.expired{
+    background:#991b1b;
+    padding:15px;
+    border-radius:10px;
+    margin-top:20px;
+}
+
+.loading{
+    text-align:center;
+}
+
+.row{
+    margin:12px 0;
+}
+
+.label{
+    font-weight:bold;
+    color:#D4AF37;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<h1>PHILOCOURS IA</h1>
+
+<h2>Vérification d'adhésion</h2>
+
+<div id="app" class="loading">
+Chargement...
+</div>
+
+</div>
+
+<script>
+
+const SUPABASE_URL =
+"https://mwwzftnjetzaeesmrfxw.supabase.co";
+
+const SUPABASE_ANON_KEY =
+"sb_publishable_G6aD0xWT57oCgf-j9PAQeg_3wGZD0RI";
+
+const client =
+supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+);
+
+function getTicket(){
+
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+    return params.get("ticket");
+}
+
+async function verifier(){
+
+    const ticket =
+        getTicket();
+
+    const app =
+        document.getElementById("app");
+
+    if(!ticket){
+
+        app.innerHTML = `
+            <div class="expired">
+                Ticket absent.
+            </div>
+        `;
+
+        return;
+    }
+
+    const { data, error } =
+        await client
+        .from('vue_verification_carte')
+        .select('*')
+        .eq('ticket', ticket)
+        .single();
+
+    if(error || !data){
+
+        app.innerHTML = `
+            <div class="expired">
+                ❌ Carte inconnue ou frauduleuse
+            </div>
+        `;
+
+        return;
+    }
+
+    const today =
+        new Date();
+
+    const expiration =
+        new Date(data.date_fin);
+
+    const statutValide =
+        expiration >= today;
+
+    app.innerHTML = `
+
+        <div class="row">
+            <span class="label">Nom :</span>
+            ${data.nom}
+        </div>
+
+        <div class="row">
+            <span class="label">Prénom :</span>
+            ${data.prenom}
+        </div>
+
+        <div class="row">
+            <span class="label">Classe :</span>
+            ${data.classe}
+        </div>
+
+        <div class="row">
+            <span class="label">Ticket :</span>
+        </div>
+
+        <div class="ticket">
+            ${data.ticket}
+        </div>
+
+        <div class="row">
+            <span class="label">Expiration :</span>
+            ${new Date(
+                data.date_fin
+            ).toLocaleDateString("fr-FR")}
+        </div>
+
+        ${
+            statutValide
+            ?
+            `
+            <div class="success">
+                ✅ Adhésion active
+            </div>
+            `
+            :
+            `
+            <div class="expired">
+                ⚠️ Adhésion expirée
+            </div>
+            `
+        }
+
+    `;
+}
+
+verifier();
+
+</script>
+
+</body>
+</html>
