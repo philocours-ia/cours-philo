@@ -1,3 +1,4 @@
+console.log("✅ AUTH.JS CHARGE");
 // =====================================================
 // PHILOCOURS IA
 // AUTH.JS
@@ -10,7 +11,7 @@ const SUPABASE_URL =
 "https://mwwzftnjetzaeesmrfxw.supabase.co";
 
 const SUPABASE_ANON_KEY =
-"COLLER_VOTRE_PUBLISHABLE_KEY_ICI";
+"sb_publishable_G6aD0xWT57oCgf-j9PAQeg_3wGZD0RI";
 
 // =====================================================
 // INITIALISATION
@@ -241,4 +242,17 @@ function logout(){
 
     window.location.href =
     "index.html";
+function logout() {
+
+    sessionStorage.clear();
+
+    window.location.href =
+    "index.html";
 }
+
+// Rendre les fonctions accessibles depuis HTML
+
+window.loginEleve = loginEleve;
+window.logout = logout;
+window.utilisateurCourant = utilisateurCourant;
+window.verifierAcces = verifierAcces;
