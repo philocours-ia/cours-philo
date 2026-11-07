@@ -1,3 +1,4 @@
+console
 console.log("✅ inscription.js chargé");
 
 // =======================================
