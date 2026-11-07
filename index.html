@@ -364,3 +364,84 @@ function showSection(section) {
     document.getElementById(section)
         .classList.remove("hidden");
 }
+
+function validerInscription()
+
+envoyerCarteParEmail(
+    nom,
+    prenom,
+    email,
+    ticket
+);
+
+setTimeout(() => {
+
+    alert(
+        "Votre inscription a été validée.\n\n" +
+        "Votre carte a été envoyée par e-mail.\n\n" +
+        "Vous allez être redirigé vers la page de connexion."
+    );
+
+    document.getElementById("inscription")
+        .classList.add("hidden");
+
+    document.getElementById("connexion")
+        .classList.remove("hidden");
+
+    document.getElementById("loginTicket").value =
+        ticket;
+
+}, 3000);
+
+<div id="connexion" class="card hidden">
+
+<h2>Connexion</h2>
+
+<label>
+Ticket
+<input
+    id="loginTicket"
+    placeholder="PH-T-48371852">
+</label>
+
+<label>
+Selfie en direct
+<input
+    type="file"
+    accept="image/*"
+    capture="user">
+</label>
+
+<button onclick="connexion()">
+    Se connecter
+</button>
+
+</div>
+
+function connexion(){
+
+    const ticket =
+        document.getElementById(
+        "loginTicket"
+    ).value.trim();
+
+    if(ticket === ""){
+
+        alert(
+            "Veuillez saisir votre ticket."
+        );
+
+        return;
+    }
+
+    alert(
+        "Connexion simulée réussie !"
+    );
+
+    document.getElementById(
+        "dashboard"
+    ).classList.remove(
+        "hidden"
+    );
+
+}
