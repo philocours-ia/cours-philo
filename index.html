@@ -340,3 +340,27 @@ behavior:"smooth"
 
 </body>
 </html>
+
+<div class="actions">
+
+    <button onclick="showSection('inscription')">
+        📝 S'inscrire
+    </button>
+
+    <button onclick="showSection('connexion')">
+        🔐 Se connecter
+    </button>
+
+</div>
+
+function showSection(section) {
+
+    document.getElementById("inscription")
+        .classList.add("hidden");
+
+    document.getElementById("connexion")
+        .classList.add("hidden");
+
+    document.getElementById(section)
+        .classList.remove("hidden");
+}
