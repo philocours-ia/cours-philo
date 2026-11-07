@@ -6,111 +6,119 @@
 
 <title>PHILOCOURS IA</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
+
 :root{
 --blue:#0D1B2A;
+--blue2:#1B263B;
 --gold:#D4AF37;
---white:#ffffff;
---danger:#dc2626;
+}
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
 }
 
 body{
-margin:0;
 font-family:Inter,sans-serif;
-background:linear-gradient(135deg,#0D1B2A,#1B263B);
+background:linear-gradient(135deg,var(--blue),var(--blue2));
 color:white;
 min-height:100vh;
 }
 
 .container{
-max-width:900px;
+max-width:1100px;
 margin:auto;
-padding:40px 20px;
+padding:30px;
 }
 
-h1,h2{
-font-family:'Playfair Display',serif;
+h1,h2,h3{
+font-family:"Playfair Display",serif;
 }
 
-.card{
-background:rgba(255,255,255,.08);
-padding:25px;
-border-radius:15px;
+.actions{
 margin-top:20px;
-backdrop-filter:blur(10px);
-}
-
-label{
-display:block;
-margin-bottom:15px;
-}
-
-input,select{
-width:100%;
-padding:12px;
-border:none;
-border-radius:8px;
-margin-top:5px;
+display:flex;
+gap:15px;
+flex-wrap:wrap;
 }
 
 button{
 background:var(--gold);
 border:none;
-padding:12px 25px;
-border-radius:8px;
-font-weight:bold;
+padding:12px 20px;
+border-radius:10px;
 cursor:pointer;
-}
-
-button:hover{
-opacity:.9;
-}
-
-.error-box{
-background:#7f1d1d;
-border:1px solid #ef4444;
-padding:15px;
-border-radius:10px;
-margin-bottom:20px;
-}
-
-.success{
-background:#14532d;
-padding:15px;
-border-radius:10px;
-margin-top:20px;
-}
-
-.ticket{
-font-size:28px;
 font-weight:bold;
-color:var(--gold);
+}
+
+.card{
+background:rgba(255,255,255,.08);
+backdrop-filter:blur(10px);
+padding:25px;
+border-radius:15px;
+margin-top:20px;
 }
 
 .hidden{
 display:none;
 }
 
+label{
+display:block;
+margin-bottom:12px;
+}
+
+input,select{
+width:100%;
+padding:10px;
+border:none;
+border-radius:8px;
+margin-top:5px;
+}
+
+.error-box{
+background:#991b1b;
+padding:15px;
+border-radius:10px;
+margin-bottom:15px;
+}
+
+.success{
+background:#14532d;
+padding:15px;
+border-radius:10px;
+}
+
 .membership-card{
 background:white;
 color:black;
-border-radius:15px;
 padding:20px;
+border-radius:15px;
 margin-top:20px;
-max-width:350px;
+max-width:400px;
+}
+
+.ticket{
+font-size:24px;
+font-weight:bold;
+color:#D4AF37;
 }
 
 .photo-preview{
-width:100px;
-height:120px;
-background:#e5e7eb;
+width:120px;
+height:140px;
+background:#ddd;
 display:flex;
-align-items:center;
 justify-content:center;
+align-items:center;
 overflow:hidden;
-border-radius:8px;
 }
 
 .photo-preview img{
@@ -118,9 +126,33 @@ width:100%;
 height:100%;
 object-fit:cover;
 }
+
+nav{
+display:flex;
+gap:20px;
+margin-top:15px;
+flex-wrap:wrap;
+}
+
+nav a{
+color:#D4AF37;
+text-decoration:none;
+}
+
+.stats{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:15px;
+margin-top:20px;
+}
+
+.stat{
+background:rgba(255,255,255,.08);
+padding:20px;
+border-radius:12px;
+}
 </style>
 </head>
-
 <body>
 
 <div class="container">
@@ -131,7 +163,21 @@ object-fit:cover;
 La philosophie intelligente au service de votre réussite
 </p>
 
-<div class="card">
+<div class="actions">
+
+<button onclick="showSection('inscription')">
+📝 S'inscrire
+</button>
+
+<button onclick="showSection('connexion')">
+🔐 Se connecter
+</button>
+
+</div>
+
+<!-- INSCRIPTION -->
+
+<div id="inscription" class="card hidden">
 
 <h2>Inscription</h2>
 
@@ -139,22 +185,22 @@ La philosophie intelligente au service de votre réussite
 
 <label>
 Nom
-<input type="text" id="nom">
+<input id="nom">
 </label>
 
 <label>
 Prénom
-<input type="text" id="prenom">
+<input id="prenom">
 </label>
 
 <label>
 Email
-<input type="email" id="email">
+<input id="email" type="email">
 </label>
 
 <label>
 Téléphone
-<input type="text" id="telephone">
+<input id="telephone">
 </label>
 
 <label>
@@ -172,19 +218,26 @@ Photo d'identité
 
 <label>
 Référence de paiement
-<input type="text" id="reference" placeholder="PHILOCOURS">
+<input id="reference" placeholder="PHILOCOURS">
 </label>
 
 <label>
 Numéro de transaction MVola
-<input type="text" id="transaction">
+<input id="transaction">
 </label>
 
 <div class="card">
-<p><strong>Adhésion :</strong> 10 000 Ar / mois</p>
+
+<h3>Informations de paiement</h3>
+
+<p>Montant : 10 000 Ar / mois</p>
+
 <p>MVola : +261385528349</p>
+
 <p>Bénéficiaire : Nasandratriniaina Julio</p>
+
 <p>Référence obligatoire : PHILOCOURS</p>
+
 </div>
 
 <br>
@@ -197,6 +250,37 @@ Valider mon inscription
 
 </div>
 
+<!-- CONNEXION -->
+
+<div id="connexion" class="card hidden">
+
+<h2>Connexion</h2>
+
+<label>
+Ticket
+<input
+id="loginTicket"
+placeholder="PH-T-12345678">
+</label>
+
+<label>
+Selfie
+<input
+type="file"
+accept="image/*"
+capture="user">
+</label>
+
+<br>
+
+<button onclick="connexion()">
+Se connecter
+</button>
+
+</div>
+
+<!-- CARTE -->
+
 <div id="carte" class="membership-card hidden">
 
 <h3>PHILOCOURS IA</h3>
@@ -207,24 +291,82 @@ PHOTO
 
 <br>
 
-<p><strong id="carteNom"></strong></p>
+<p>
+<strong id="carteNom"></strong>
+</p>
 
 <p>
 Classe :
 <span id="carteClasse"></span>
 </p>
 
-<p>
-Ticket :
-</p>
+<br>
 
-<div class="ticket" id="ticket"></div>
+<p>Ticket :</p>
+
+<div id="ticket" class="ticket"></div>
 
 <br>
 
-<p>
-Valable 30 jours
-</p>
+<div id="qrcode"></div>
+
+<br>
+
+<p id="expirationText"></p>
+
+<br>
+
+<button onclick="telechargerCarte()">
+📥 Télécharger la carte PDF
+</button>
+
+</div>
+
+<!-- DASHBOARD -->
+
+<div id="dashboard" class="card hidden">
+
+<h2>Tableau de bord Élève</h2>
+
+<nav>
+
+<a href="#">📚 Mes cours</a>
+
+<a href="#">🤖 Assistant IA</a>
+
+<a href="#">📝 Quiz</a>
+
+<a href="#">✍ Dissertation</a>
+
+<a href="#">🏆 Badges</a>
+
+<a href="#">💬 Forum</a>
+
+</nav>
+
+<div class="stats">
+
+<div class="stat">
+<h3>Quiz réalisés</h3>
+<p>12</p>
+</div>
+
+<div class="stat">
+<h3>Cours suivis</h3>
+<p>24</p>
+</div>
+
+<div class="stat">
+<h3>Badges</h3>
+<p>5</p>
+</div>
+
+<div class="stat">
+<h3>Validité</h3>
+<p>30 jours</p>
+</div>
+
+</div>
 
 </div>
 
@@ -232,18 +374,34 @@ Valable 30 jours
 
 <script>
 
+function showSection(id){
+
+document.getElementById("inscription")
+.classList.add("hidden");
+
+document.getElementById("connexion")
+.classList.add("hidden");
+
+document.getElementById(id)
+.classList.remove("hidden");
+}
+
 function genererTicket(classe){
 
 if(classe==="Premiere"){
+
 return "PH-P-" +
 Math.floor(
-100000 + Math.random()*900000
+100000 +
+Math.random()*900000
 );
+
 }
 
 return "PH-T-" +
 Math.floor(
-10000000 + Math.random()*90000000
+10000000 +
+Math.random()*90000000
 );
 }
 
@@ -251,84 +409,200 @@ function validerInscription(){
 
 const erreurs=[];
 
-const nom=document.getElementById("nom").value.trim();
-const prenom=document.getElementById("prenom").value.trim();
-const email=document.getElementById("email").value.trim();
-const telephone=document.getElementById("telephone").value.trim();
-const classe=document.getElementById("classe").value;
-const reference=document.getElementById("reference").value.trim();
-const transaction=document.getElementById("transaction").value.trim();
+const nom =
+document.getElementById("nom").value.trim();
+
+const prenom =
+document.getElementById("prenom").value.trim();
+
+const email =
+document.getElementById("email").value.trim();
+
+const telephone =
+document.getElementById("telephone").value.trim();
+
+const classe =
+document.getElementById("classe").value;
+
+const reference =
+document.getElementById("reference").value.trim();
+
+const transaction =
+document.getElementById("transaction").value.trim();
+
+const regex =
+/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+if(nom==="")
+erreurs.push("Nom obligatoire");
+
+if(prenom==="")
+erreurs.push("Prénom obligatoire");
+
+if(!regex.test(email))
+erreurs.push("Email invalide");
+
+if(telephone.length < 10)
+erreurs.push("Téléphone invalide");
+
+if(reference.toUpperCase()!=="PHILOCOURS")
+erreurs.push("Référence incorrecte");
+
+if(transaction.length < 8)
+erreurs.push("Transaction invalide");
 
 document.getElementById("errors").innerHTML="";
-document.getElementById("success").innerHTML="";
 
-if(nom===""){
-erreurs.push("Le nom est obligatoire.");
-}
+if(erreurs.length){
 
-if(prenom===""){
-erreurs.push("Le prénom est obligatoire.");
-}
-
-const emailRegex=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-if(!emailRegex.test(email)){
-erreurs.push("Adresse e-mail invalide.");
-}
-
-if(telephone.length<10){
-erreurs.push("Numéro de téléphone invalide.");
-}
-
-if(reference.toUpperCase()!=="PHILOCOURS"){
-erreurs.push("La référence doit être PHILOCOURS.");
-}
-
-if(transaction.length<8){
-erreurs.push("Numéro de transaction invalide.");
-}
-
-if(erreurs.length>0){
-
-document.getElementById("errors").innerHTML=
-'<div class="error-box">'+
-erreurs.join("<br>")+
-'</div>';
+document.getElementById("errors")
+.innerHTML=
+`
+<div class="error-box">
+${erreurs.join("<br>")}
+</div>
+`;
 
 return;
 }
 
-const ticket=genererTicket(classe);
+const ticket =
+genererTicket(classe);
 
-document.getElementById("ticket").textContent=ticket;
-document.getElementById("carteNom").textContent=
+document.getElementById("ticket")
+.textContent=ticket;
+
+document.getElementById("carteNom")
+.textContent=
 nom + " " + prenom;
 
-document.getElementById("carteClasse").textContent=
+document.getElementById("carteClasse")
+.textContent=
 classe;
 
-const photoInput=document.getElementById("photo");
+const expiration =
+new Date();
 
-if(photoInput.files.length>0){
+expiration.setDate(
+expiration.getDate()+30
+);
 
-const reader=new FileReader();
+document.getElementById(
+"expirationText"
+).textContent=
+"Valable jusqu'au "
++
+expiration.toLocaleDateString("fr-FR");
+
+const verificationURL =
+window.location.origin +
+"/verifier.html?ticket=" +
+encodeURIComponent(ticket);
+
+document.getElementById(
+"qrcode"
+).innerHTML="";
+
+new QRCode(
+document.getElementById("qrcode"),
+{
+text:verificationURL,
+width:120,
+height:120
+}
+);
+
+const photo =
+document.getElementById("photo");
+
+if(photo.files.length){
+
+const reader =
+new FileReader();
 
 reader.onload=function(e){
 
-document.getElementById("photoZone").innerHTML=
-'<img src="'+e.target.result+'">';
+document.getElementById(
+"photoZone"
+).innerHTML=
+`<img src="${e.target.result}">`;
 
 };
 
-reader.readAsDataURL(photoInput.files[0]);
+reader.readAsDataURL(
+photo.files[0]
+);
 
 }
 
-document.getElementById("carte")
-.classList.remove("hidden");
+document.getElementById(
+"carte"
+).classList.remove(
+"hidden"
+);
 
-document.getElementById("success").innerHTML=
-'<div class="success">✅ Inscription validée. Ticket généré : <strong>'+ticket+'</strong></div>';
+document.getElementById(
+"success"
+).innerHTML=
+`
+<div class="success">
+
+✅ Inscription validée<br><br>
+
+✅ Ticket : <strong>${ticket}</strong><br>
+
+✅ Carte générée<br>
+
+✅ QR Code généré<br>
+
+✅ E-mail prêt à être envoyé
+
+</div>
+`;
+
+setTimeout(()=>{
+
+document.getElementById(
+"inscription"
+).classList.add("hidden");
+
+document.getElementById(
+"connexion"
+).classList.remove(
+"hidden"
+);
+
+document.getElementById(
+"loginTicket"
+).value=ticket;
+
+alert(
+"Inscription réussie.\n\nConnectez-vous maintenant."
+);
+
+},3000);
+
+}
+
+function connexion(){
+
+const ticket =
+document.getElementById(
+"loginTicket"
+).value.trim();
+
+if(ticket===""){
+
+alert(
+"Veuillez saisir un ticket"
+);
+
+return;
+}
+
+document.getElementById(
+"dashboard"
+).classList.remove("hidden");
 
 window.scrollTo({
 top:document.body.scrollHeight,
@@ -336,112 +610,21 @@ behavior:"smooth"
 });
 
 }
+
+function telechargerCarte(){
+
+const carte =
+document.getElementById("carte");
+
+html2pdf()
+.from(carte)
+.save(
+"Carte_PHILOCOURS_IA.pdf"
+);
+
+}
+
 </script>
 
 </body>
 </html>
-
-<div class="actions">
-
-    <button onclick="showSection('inscription')">
-        📝 S'inscrire
-    </button>
-
-    <button onclick="showSection('connexion')">
-        🔐 Se connecter
-    </button>
-
-</div>
-
-function showSection(section) {
-
-    document.getElementById("inscription")
-        .classList.add("hidden");
-
-    document.getElementById("connexion")
-        .classList.add("hidden");
-
-    document.getElementById(section)
-        .classList.remove("hidden");
-}
-
-function validerInscription()
-
-envoyerCarteParEmail(
-    nom,
-    prenom,
-    email,
-    ticket
-);
-
-setTimeout(() => {
-
-    alert(
-        "Votre inscription a été validée.\n\n" +
-        "Votre carte a été envoyée par e-mail.\n\n" +
-        "Vous allez être redirigé vers la page de connexion."
-    );
-
-    document.getElementById("inscription")
-        .classList.add("hidden");
-
-    document.getElementById("connexion")
-        .classList.remove("hidden");
-
-    document.getElementById("loginTicket").value =
-        ticket;
-
-}, 3000);
-
-<div id="connexion" class="card hidden">
-
-<h2>Connexion</h2>
-
-<label>
-Ticket
-<input
-    id="loginTicket"
-    placeholder="PH-T-48371852">
-</label>
-
-<label>
-Selfie en direct
-<input
-    type="file"
-    accept="image/*"
-    capture="user">
-</label>
-
-<button onclick="connexion()">
-    Se connecter
-</button>
-
-</div>
-
-function connexion(){
-
-    const ticket =
-        document.getElementById(
-        "loginTicket"
-    ).value.trim();
-
-    if(ticket === ""){
-
-        alert(
-            "Veuillez saisir votre ticket."
-        );
-
-        return;
-    }
-
-    alert(
-        "Connexion simulée réussie !"
-    );
-
-    document.getElementById(
-        "dashboard"
-    ).classList.remove(
-        "hidden"
-    );
-
-}
