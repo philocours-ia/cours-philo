@@ -1,10 +1,8 @@
-// =====================================================
-// PHILOCOURS IA
-// INSCRIPTION.JS
-// Gestion des inscriptions
-// =====================================================
+console.log("✅ inscription.js chargé");
 
+// =======================================
 // Génération ticket
+// =======================================
 
 function genererTicket(classe) {
 
@@ -12,310 +10,184 @@ function genererTicket(classe) {
 
         return "PH-P-" +
             Math.floor(
-                100000 + Math.random() * 900000
+                100000 +
+                Math.random() * 900000
             );
-
     }
 
     return "PH-T-" +
         Math.floor(
-            10000000 + Math.random() * 90000000
+            10000000 +
+            Math.random() * 90000000
         );
 }
 
-// ===============================================
-// Vérification email
-// ===============================================
+// =======================================
+// Validation email
+// =======================================
 
 function emailValide(email) {
 
-    const regex =
-        /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    return regex.test(email);
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        .test(email);
 }
 
-// ===============================================
-// Vérifier transaction déjà utilisée
-// ===============================================
-
-async function transactionExiste(numero) {
-
-    const { data } = await supabaseClient
-
-        .from("transactions")
-
-        .select("id")
-
-        .eq(
-            "numero_transaction",
-            numero
-        )
-
-        .maybeSingle();
-
-    return !!data;
-}
-
-// ===============================================
-// Création élève
-// ===============================================
-
-async function creerEleve(formData) {
-
-    const ticket =
-        genererTicket(
-            formData.classe
-        );
-
-    // ------------------------------------------------
-    // 1. UTILISATEUR
-    // ------------------------------------------------
-
-    const { data: utilisateur,
-            error: erreurUser } =
-    await supabaseClient
-
-        .from("utilisateurs")
-
-        .insert({
-
-            nom: formData.nom,
-
-            prenom: formData.prenom,
-
-            sexe: formData.sexe,
-
-            email: formData.email,
-
-            telephone:
-                formData.telephone,
-
-            date_naissance:
-                formData.date_naissance,
-
-            classe:
-                formData.classe,
-
-            validation_admin: false
-
-        })
-
-        .select()
-
-        .single();
-
-    if(erreurUser){
-
-        console.error(erreurUser);
-
-        throw erreurUser;
-    }
-
-    // ------------------------------------------------
-    // 2. TRANSACTION
-    // ------------------------------------------------
-
-    const { data: transaction,
-            error: erreurTransaction } =
-
-    await supabaseClient
-
-        .from("transactions")
-
-        .insert({
-
-            utilisateur_id:
-                utilisateur.id,
-
-            numero_transaction:
-                formData.transaction,
-
-            montant:10000,
-
-            operateur:'MVOLA',
-
-            reference_paiement:
-                'PHILOCOURS',
-
-            date_transaction:
-                new Date()
-
-        })
-
-        .select()
-
-        .single();
-
-    if(erreurTransaction){
-
-        console.error(
-            erreurTransaction
-        );
-
-        throw erreurTransaction;
-    }
-
-    // ------------------------------------------------
-    // 3. ADHESION
-    // ------------------------------------------------
-
-    const aujourdhui =
-        new Date();
-
-    const expiration =
-        new Date();
-
-    expiration.setDate(
-        expiration.getDate() + 30
-    );
-
-    const { data: adhesion,
-            error: erreurAdhesion } =
-
-    await supabaseClient
-
-        .from("adhesions")
-
-        .insert({
-
-            utilisateur_id:
-                utilisateur.id,
-
-            transaction_id:
-                transaction.id,
-
-            ticket: ticket,
-
-            date_adhesion:
-                aujourdhui,
-
-            date_expiration:
-                expiration
-
-        })
-
-        .select()
-
-        .single();
-
-    if(erreurAdhesion){
-
-        console.error(
-            erreurAdhesion
-        );
-
-        throw erreurAdhesion;
-    }
-
-    return {
-
-        utilisateur,
-
-        transaction,
-
-        adhesion,
-
-        ticket
-
-    };
-
-}
-
-// ===============================================
-// Validation formulaire
-// ===============================================
+// =======================================
+// INSCRIPTION
+// =======================================
 
 async function inscrireEleve() {
 
-    const erreurs = [];
+    console.log(
+        "✅ Bouton inscription cliqué"
+    );
 
     const nom =
-    document.getElementById("nom")
-    .value.trim();
+        document.getElementById("nom")
+        .value.trim();
 
     const prenom =
-    document.getElementById("prenom")
-    .value.trim();
-
-    const email =
-    document.getElementById("email")
-    .value.trim();
-
-    const telephone =
-    document.getElementById("telephone")
-    .value.trim();
-
-    const classe =
-    document.getElementById("classe")
-    .value;
-
-    const transaction =
-    document.getElementById("transaction")
-    .value.trim();
+        document.getElementById("prenom")
+        .value.trim();
 
     const sexe =
-    document.getElementById("sexe")
-    .value;
+        document.getElementById("sexe")
+        .value;
 
-    if(!nom)
+    const email =
+        document.getElementById("email")
+        .value.trim();
+
+    const telephone =
+        document.getElementById("telephone")
+        .value.trim();
+
+    const dateNaissance =
+        document.getElementById(
+            "date_naissance"
+        ).value;
+
+    const classe =
+        document.getElementById("classe")
+        .value;
+
+    const reference =
+        document.getElementById(
+            "reference"
+        ).value.trim();
+
+    const transaction =
+        document.getElementById(
+            "transaction"
+        ).value.trim();
+
+    const erreurs = [];
+
+    if (!nom)
         erreurs.push(
             "Nom obligatoire"
         );
 
-    if(!prenom)
+    if (!prenom)
         erreurs.push(
             "Prénom obligatoire"
         );
 
-    if(!emailValide(email))
+    if (!emailValide(email))
         erreurs.push(
             "Email invalide"
         );
 
-    if(transaction.length < 8)
+    if (telephone.length < 10)
+        erreurs.push(
+            "Téléphone invalide"
+        );
+
+    if (
+        reference.toUpperCase()
+        !== "PHILOCOURS"
+    ) {
+        erreurs.push(
+            "La référence doit être PHILOCOURS"
+        );
+    }
+
+    if (transaction.length < 8) {
+
         erreurs.push(
             "Transaction invalide"
         );
 
-    const existe =
-        await transactionExiste(
-            transaction
-        );
+    }
 
-    if(existe)
-        erreurs.push(
-            "Numéro de transaction déjà utilisé"
-        );
-
-    if(erreurs.length){
+    if (erreurs.length > 0) {
 
         document.getElementById(
             "errors"
         ).innerHTML =
         `
         <div class="error-box">
-        ${erreurs.join("<br>")}
+            ${erreurs.join("<br>")}
         </div>
         `;
 
         return;
     }
 
+    const ticket =
+        genererTicket(classe);
+
     try {
 
-        const resultat =
-        await creerEleve({
+        // ==================================
+        // Sauvegarde Supabase
+        // ==================================
+
+        const { error } =
+
+        await supabaseClient
+
+        .from("utilisateurs")
+
+        .insert({
 
             nom,
+
             prenom,
+
+            sexe,
+
             email,
+
             telephone,
+
+            date_naissance:
+                dateNaissance,
+
             classe,
-            transaction,
-            sexe
+
+            ticket_actuel:
+                ticket,
+
+            validation_admin:
+                false
 
         });
+
+        if(error){
+
+            console.error(error);
+
+            alert(
+                "Erreur lors de l'inscription"
+            );
+
+            return;
+        }
+
+        // ==================================
+        // Message succès
+        // ==================================
 
         document.getElementById(
             "success"
@@ -324,35 +196,67 @@ async function inscrireEleve() {
         `
         <div class="success">
 
-        ✅ Demande enregistrée
+            ✅ Inscription enregistrée
 
-        <br><br>
+            <br><br>
 
-        Ticket :
-        <strong>
-        ${resultat.ticket}
-        </strong>
+            Ticket :
 
-        <br><br>
+            <strong>${ticket}</strong>
 
-        Votre inscription est en attente
-        de validation par l'administrateur.
+            <br><br>
+
+            Votre demande est en attente
+            de validation par
+            l'administrateur.
+
+            <br><br>
+
+            Vous allez être redirigé
+            vers la page de connexion.
 
         </div>
         `;
 
-        console.log(resultat);
+        // ==================================
+        // Redirection
+        // ==================================
+
+        setTimeout(() => {
+
+            showSection(
+                "connexion"
+            );
+
+            const champTicket =
+            document.getElementById(
+                "loginTicket"
+            );
+
+            if(champTicket){
+
+                champTicket.value =
+                    ticket;
+            }
+
+        }, 3000);
 
     }
 
-    catch(e){
+    catch(err){
 
-        console.error(e);
+        console.error(err);
 
         alert(
-            "Erreur lors de l'inscription"
+            "Erreur inattendue"
         );
 
     }
-
 }
+
+// =======================================
+// Disponible partout
+// =======================================
+
+window.inscrireEleve =
+inscrireEleve;
