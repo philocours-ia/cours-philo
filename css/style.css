@@ -539,3 +539,190 @@ footer{
         font-size:3rem;
     }
 }
+/* =====================================================
+   SECTIONS MASQUÉES
+   ===================================================== */
+
+.hidden{
+    display:none;
+}
+
+/* =====================================================
+   FORMULAIRES
+   ===================================================== */
+
+.info{
+
+    border-left:4px solid var(--gold);
+
+    padding-left:15px;
+
+    margin:15px 0;
+}
+
+/* =====================================================
+   PAGE CONNEXION
+   ===================================================== */
+
+#connexion{
+
+    max-width:700px;
+
+    margin:auto;
+}
+
+/* =====================================================
+   PAGE INSCRIPTION
+   ===================================================== */
+
+#inscription{
+
+    max-width:800px;
+
+    margin:auto;
+}
+
+/* =====================================================
+   DASHBOARD ADMIN
+   ===================================================== */
+
+.content{
+
+    flex:1;
+
+    padding:30px;
+}
+
+.header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:30px;
+}
+
+.topbar{
+
+    display:flex;
+
+    gap:15px;
+}
+
+/* =====================================================
+   DASHBOARD ELEVE
+   ===================================================== */
+
+.empty{
+
+    opacity:.7;
+
+    padding:15px;
+}
+
+/* =====================================================
+   TABLEAUX
+   ===================================================== */
+
+tbody tr:hover{
+
+    background:
+    rgba(255,255,255,.05);
+}
+
+/* =====================================================
+   CARTE ADHERENT
+   ===================================================== */
+
+.membership-card{
+
+    background:white;
+
+    color:black;
+
+    border-radius:20px;
+
+    padding:20px;
+
+    max-width:450px;
+
+    margin:auto;
+}
+
+.membership-card h3{
+
+    color:#0D1B2A;
+}
+
+.membership-card p{
+
+    color:#222;
+}
+
+/* =====================================================
+   QR CODE
+   ===================================================== */
+
+#qrcode{
+
+    display:flex;
+
+    justify-content:center;
+
+    margin-top:15px;
+}
+
+/* =====================================================
+   STATUTS
+   ===================================================== */
+
+.status-active{
+
+    color:#22C55E;
+
+    font-weight:bold;
+}
+
+.status-attente{
+
+    color:#FACC15;
+
+    font-weight:bold;
+}
+
+.status-expire{
+
+    color:#EF4444;
+
+    font-weight:bold;
+}
+
+/* =====================================================
+   RESPONSIVE DASHBOARDS
+   ===================================================== */
+
+@media(max-width:900px){
+
+    .content{
+
+        padding:15px;
+    }
+
+    .header{
+
+        flex-direction:column;
+
+        gap:15px;
+
+        align-items:flex-start;
+    }
+
+    table{
+
+        display:block;
+
+        overflow-x:auto;
+    }
+}
