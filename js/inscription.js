@@ -12,7 +12,6 @@ function genererTicket(classe){
     );
 
     if(classe === "Premiere"){
-
         return `PH-P-${numero}`;
     }
 
@@ -141,52 +140,47 @@ async function inscrireEleve(){
             "👤 Création utilisateur..."
         );
 
+        console.log(
+            "URL :",
+            SUPABASE_URL
+        );
+
+        // =========================================
+        // CREATION DE L'UTILISATEUR
+        // =========================================
+
         const {
-    data: userData,
-    error: userError
-} = await supabaseClient
+            data: userData,
+            error: userError
+        } = await supabaseClient
 
-.from("utilisateurs")
+            .from("utilisateurs")
 
-.insert([{
+            .insert([{
 
-    nom,
-    prenom,
-    sexe,
-    email,
-    telephone,
+                nom,
+                prenom,
+                sexe,
+                email,
+                telephone,
 
-    date_naissance: dateNaissance,
+                date_naissance:
+                dateNaissance,
 
-    classe,
+                classe,
 
-    ticket_actuel: ticket,
+                ticket_actuel:
+                ticket,
 
-    validation_admin: false
+                validation_admin:
+                false
 
-}])
+            }])
 
-.select()
+            .select()
 
-.single();
+            .single();
 
-
-if(userError){
-
-    console.error(
-        "❌ USER ERROR",
-        userError
-    );
-
-    alert(userError.message);
-
-    return;
-}
-
-console.log(
-    "✅ Utilisateur créé",
-    userData
-);
         if(userError){
 
             console.error(
@@ -216,38 +210,36 @@ console.log(
 
         const {
 
-            data:transactionData,
-            error:transactionError
+            data: transactionData,
+            error: transactionError
 
-        } =
+        } = await supabaseClient
 
-        await supabaseClient
+            .from("transactions")
 
-        .from("transactions")
+            .insert([{
 
-        .insert([{
+                utilisateur_id:
+                userData.id,
 
-            utilisateur_id:
-            userData.id,
+                numero_transaction:
+                transaction,
 
-            numero_transaction:
-            transaction,
+                montant: 10000,
 
-            montant:10000,
+                operateur: "MVOLA",
 
-            operateur:"MVOLA",
+                reference_paiement:
+                "PHILOCOURS",
 
-            reference_paiement:
-            "PHILOCOURS",
+                date_transaction:
+                new Date()
 
-            date_transaction:
-            new Date()
+            }])
 
-        }])
+            .select()
 
-        .select()
-
-        .single();
+            .single();
 
         if(transactionError){
 
@@ -288,36 +280,34 @@ console.log(
 
         const {
 
-            data:adhesionData,
-            error:adhesionError
+            data: adhesionData,
+            error: adhesionError
 
-        } =
+        } = await supabaseClient
 
-        await supabaseClient
+            .from("adhesions")
 
-        .from("adhesions")
+            .insert([{
 
-        .insert([{
+                utilisateur_id:
+                userData.id,
 
-            utilisateur_id:
-            userData.id,
+                transaction_id:
+                transactionData.id,
 
-            transaction_id:
-            transactionData.id,
+                ticket,
 
-            ticket,
+                date_adhesion:
+                dateDebut,
 
-            date_adhesion:
-            dateDebut,
+                date_expiration:
+                dateFin
 
-            date_expiration:
-            dateFin
+            }])
 
-        }])
+            .select()
 
-        .select()
-
-        .single();
+            .single();
 
         if(adhesionError){
 
@@ -403,7 +393,7 @@ console.log(
                 ticket;
             }
 
-        },3000);
+        }, 3000);
 
     }
 
