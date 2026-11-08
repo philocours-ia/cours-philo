@@ -1,171 +1,62 @@
-// =====================================================
-// PHILOCOURS IA
-// VERIFIER.JS
-// =====================================================
+// PHILOCOURS IA — vérification publique d'un ticket / QR
+"use strict";
 
-function getTicketURL(){
-
-    const params =
-    new URLSearchParams(
-        window.location.search
-    );
-
-    return params.get("ticket");
+function getTicketURL() {
+    return new URLSearchParams(window.location.search).get("ticket");
 }
 
-// =====================================================
-// VERIFICATION QR
-// =====================================================
+async function verifierTicketQR() {
+    const ticket = getTicketURL();
+    const zone = document.getElementById("contenu");
+    if (!zone) return;
 
-async function verifierTicketQR(){
-
-    const ticket =
-    getTicketURL();
-
-    const zone =
-    document.getElementById(
-        "contenu"
-    );
-
-    if(!ticket){
-
-        zone.innerHTML = `
-        <div class="error">
-
-        Aucun ticket fourni.
-
-        </div>
-        `;
-
+    if (!ticket) {
+        zone.innerHTML = '<div class="error">Aucun ticket fourni.</div>';
         return;
     }
 
-    try{
-
-        const { data, error } =
-
-        await supabaseClient
-
-        .from("vue_eleves")
-
-        .select("*")
-
-        .eq(
-            "ticket",
-            ticket
-        )
-
-        .single();
-
-        if(error || !data){
-
-            zone.innerHTML = `
-            <div class="error">
-
-            ❌ Carte inconnue
-
-            </div>
-            `;
-
+    zone.textContent = "Vérification en cours...";
+    try {
+        const { data, error } = await supabaseClient
+            .from("vue_eleves").select("nom,prenom,classe,ticket,date_expiration,validation_admin,statut")
+            .eq("ticket", ticket.trim()).maybeSingle();
+        if (error) throw error;
+        if (!data) {
+            zone.innerHTML = '<div class="error">❌ Carte inconnue.</div>';
             return;
         }
 
-        const expiration =
-        new Date(
-            data.date_expiration
-        );
+        // Comparer une date d'expiration sans heure comme une date entière inclusive.
+        const dateExpiration = data.date_expiration
+            ? new Date(`${String(data.date_expiration).slice(0,10)}T23:59:59`)
+            : null;
+        const dateValide = dateExpiration && !Number.isNaN(dateExpiration.getTime()) &&
+            dateExpiration >= new Date();
+        const statutValide = !data.statut ||
+            String(data.statut).toLowerCase() === "actif";
+        const actif = Boolean(data.validation_admin) && Boolean(dateValide) && statutValide;
 
-        const maintenant =
-        new Date();
-
-        const actif =
-        expiration >= maintenant &&
-        data.validation_admin;
-
-        zone.innerHTML = `
-
-        <div class="row">
-
-        <span class="label">
-        Nom :
-        </span>
-
-        ${data.nom}
-
-        ${data.prenom}
-
-        </div>
-
-        <div class="row">
-
-        <span class="label">
-        Classe :
-        </span>
-
-        ${data.classe}
-
-        </div>
-
-        <div class="row">
-
-        <span class="label">
-        Ticket :
-        </span>
-
-        <div class="ticket">
-
-        ${data.ticket}
-
-        </div>
-
-        </div>
-
-        <div class="row">
-
-        <span class="label">
-        Expiration :
-        </span>
-
-        ${new Date(
-            data.date_expiration
-        ).toLocaleDateString(
-            "fr-FR"
-        )}
-
-        </div>
-
-        <div class="${
-            actif
-            ?
-            "success"
-            :
-            "error"
-        }">
-
-        ${
-            actif
-            ?
-            "✅ Adhésion active"
-            :
-            "❌ Adhésion expirée ou non validée"
-        }
-
-        </div>
-
-        `;
-
-    }
-
-    catch(err){
-
-        console.error(err);
-
-        zone.innerHTML = `
-        <div class="error">
-
-        Erreur de vérification.
-
-        </div>
-        `;
+        const nom = document.createElement("div");
+        nom.className = "row";
+        nom.textContent = `Nom : ${data.nom || ""} ${data.prenom || ""}`;
+        const classe = document.createElement("div");
+        classe.className = "row";
+        classe.textContent = `Classe : ${data.classe || "-"}`;
+        const ticketEl = document.createElement("div");
+        ticketEl.className = "row";
+        ticketEl.textContent = `Ticket : ${data.ticket || "-"}`;
+        const expiration = document.createElement("div");
+        expiration.className = "row";
+        expiration.textContent = `Expiration : ${formatDate(data.date_expiration)}`;
+        const status = document.createElement("div");
+        status.className = actif ? "success" : "error";
+        status.textContent = actif ? "✅ Adhésion active" : "❌ Adhésion expirée ou non validée";
+        zone.replaceChildren(nom, classe, ticketEl, expiration, status);
+    } catch (err) {
+        console.error("Vérification ticket :", err);
+        zone.innerHTML = '<div class="error">Erreur de vérification. Réessayez plus tard.</div>';
     }
 }
+
+window.getTicketURL = getTicketURL;
+window.verifierTicketQR = verifierTicketQR;

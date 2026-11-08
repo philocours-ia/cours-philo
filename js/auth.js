@@ -1,261 +1,110 @@
-console.log("✅ AUTH.JS CHARGE");
+// PHILOCOURS IA — authentification et initialisation Supabase
+"use strict";
 
-// =====================================================
-// CONFIGURATION SUPABASE
-// =====================================================
+console.log("PHILOCOURS IA : auth.js chargé");
 
-const SUPABASE_URL =
-"https://mwwzftnjetzaeesmrfxw.supabase.co";
+const SUPABASE_URL = "https://mwwzftnjetzaeesmrfxw.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_G6aD0xWT57oCgf-j9PAQeg_3wGZD0RI";
 
-const SUPABASE_ANON_KEY =
-"sb_publishable_G6aD0xWT57oCgf-j9PAQeg_3wGZD0RI";
+if (!window.supabase || typeof window.supabase.createClient !== "function") {
+    throw new Error("La bibliothèque Supabase doit être chargée avant auth.js.");
+}
 
-// =====================================================
-// INITIALISATION
-// =====================================================
+const supabaseClient = window.supabaseClient ||
+    window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+window.supabaseClient = supabaseClient;
 
-const supabaseClient =
-supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY
-);
+async function rechercherTicket(ticket) {
+    if (!ticket || typeof ticket !== "string") return null;
+    const { data, error } = await supabaseClient
+        .from("adhesions").select("*").eq("ticket", ticket.trim()).maybeSingle();
+    if (error) {
+        console.error("Recherche ticket :", error);
+        return null;
+    }
+    return data;
+}
 
-// =====================================================
-// TEST
-// =====================================================
+async function rechercherUtilisateur(id) {
+    if (!id) return null;
+    const { data, error } = await supabaseClient
+        .from("utilisateurs").select("*").eq("id", id).maybeSingle();
+    if (error) {
+        console.error("Recherche utilisateur :", error);
+        return null;
+    }
+    return data;
+}
 
-async function testConnexion(){
-
-    try{
-
-        const { data, error } =
-        await supabaseClient
-        .from("utilisateurs")
-        .select("*")
-        .limit(1);
-
-        if(error){
-
-            console.error(error);
-
-            return false;
+async function verifierAcces(ticket) {
+    try {
+        const adhesion = await rechercherTicket(ticket);
+        if (!adhesion) {
+            return { autorise: false, message: "Ticket introuvable." };
         }
 
-        console.log(
-            "✅ Connexion Supabase OK"
-        );
+        const utilisateur = await rechercherUtilisateur(adhesion.utilisateur_id);
+        if (!utilisateur) {
+            return { autorise: false, message: "Utilisateur introuvable." };
+        }
 
-        return true;
+        if (utilisateur.validation_admin !== true) {
+            return {
+                autorise: false,
+                message: "Votre ticket est en attente de validation administrateur."
+            };
+        }
 
-    }catch(err){
+        // Si la date d'expiration est présente dans la ligne adhésion, la contrôler.
+        if (adhesion.date_expiration) {
+            const expiration = new Date(`${String(adhesion.date_expiration).slice(0,10)}T23:59:59`);
+            if (Number.isNaN(expiration.getTime()) || expiration < new Date()) {
+                return { autorise: false, message: "Votre adhésion a expiré." };
+            }
+        }
 
-        console.error(err);
-
-        return false;
+        return { autorise: true, utilisateur, adhesion };
+    } catch (err) {
+        console.error("Vérification d'accès :", err);
+        return { autorise: false, message: "Erreur lors de la vérification du ticket." };
     }
 }
 
-// =====================================================
-// RECHERCHE TICKET
-// =====================================================
-
-async function rechercherTicket(ticket){
-
-    const { data, error } =
-
-    await supabaseClient
-
-    .from("adhesions")
-
-    .select("*")
-
-    .eq("ticket", ticket)
-
-    .single();
-
-    if(error){
-
-        console.error(error);
-
-        return null;
-    }
-
-    return data;
-}
-
-// =====================================================
-// RECHERCHE UTILISATEUR
-// =====================================================
-
-async function rechercherUtilisateur(id){
-
-    const { data, error } =
-
-    await supabaseClient
-
-    .from("utilisateurs")
-
-    .select("*")
-
-    .eq("id", id)
-
-    .single();
-
-    if(error){
-
-        console.error(error);
-
-        return null;
-    }
-
-    return data;
-}
-
-// =====================================================
-// CONTROLE ACCES
-// =====================================================
-
-async function verifierAcces(ticket){
-
-    const adhesion =
-    await rechercherTicket(ticket);
-
-    if(!adhesion){
-
-        return {
-
-            autorise:false,
-
-            message:
-            "Ticket introuvable"
-
-        };
-    }
-
-    const utilisateur =
-    await rechercherUtilisateur(
-        adhesion.utilisateur_id
-    );
-
-    if(!utilisateur){
-
-        return {
-
-            autorise:false,
-
-            message:
-            "Utilisateur introuvable"
-
-        };
-    }
-
-    if(
-        utilisateur.validation_admin
-        !== true
-    ){
-
-        return {
-
-            autorise:false,
-
-            message:
-            "Votre ticket est en attente de validation administrateur."
-
-        };
-    }
-
-    return {
-
-        autorise:true,
-
-        utilisateur,
-
-        adhesion
-
-    };
-}
-
-// =====================================================
-// CONNEXION ELEVE
-// =====================================================
-
-async function loginEleve(ticket){
-
-    const resultat =
-    await verifierAcces(ticket);
-
-    if(!resultat.autorise){
-
-        alert(
-            resultat.message
-        );
-
+async function loginEleve(ticket) {
+    const resultat = await verifierAcces(ticket);
+    if (!resultat.autorise) {
+        alert(resultat.message);
         return false;
     }
 
-    sessionStorage.setItem(
-        "utilisateur",
-        JSON.stringify(
-            resultat.utilisateur
-        )
-    );
-
-    sessionStorage.setItem(
-        "ticket",
-        ticket
-    );
-
+    sessionStorage.setItem("utilisateur", JSON.stringify(resultat.utilisateur));
+    sessionStorage.setItem("ticket", ticket.trim());
     return true;
 }
 
-// =====================================================
-// UTILISATEUR CONNECTE
-// =====================================================
-
-function utilisateurCourant(){
-
-    const user =
-    sessionStorage.getItem(
-        "utilisateur"
-    );
-
-    if(!user){
-
+function utilisateurCourant() {
+    try {
+        const raw = sessionStorage.getItem("utilisateur");
+        return raw ? JSON.parse(raw) : null;
+    } catch (err) {
+        console.error("Session utilisateur invalide :", err);
+        sessionStorage.removeItem("utilisateur");
+        sessionStorage.removeItem("ticket");
         return null;
     }
-
-    return JSON.parse(user);
 }
 
-// =====================================================
-// DECONNEXION
-// =====================================================
-
-function logout(){
-
-    sessionStorage.clear();
-
-    window.location.href =
-    "index.html";
+function logout() {
+    sessionStorage.removeItem("utilisateur");
+    sessionStorage.removeItem("ticket");
+    window.location.href = "index.html";
 }
 
-// =====================================================
-// EXPORT GLOBAL
-// =====================================================
+window.loginEleve = loginEleve;
+window.utilisateurCourant = utilisateurCourant;
+window.logout = logout;
+window.verifierAcces = verifierAcces;
+window.rechercherTicket = rechercherTicket;
+window.rechercherUtilisateur = rechercherUtilisateur;
 
-window.supabaseClient =
-supabaseClient;
-
-window.loginEleve =
-loginEleve;
-
-window.logout =
-logout;
-
-window.utilisateurCourant =
-utilisateurCourant;
-
-window.verifierAcces =
-verifierAcces;
-
-console.log("✅ FIN AUTH");
+console.log("PHILOCOURS IA : Supabase initialisé");

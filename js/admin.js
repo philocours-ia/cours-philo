@@ -1,470 +1,200 @@
-// =====================================================
-// PHILOCOURS IA
-// ADMIN.JS
-// =====================================================
+// PHILOCOURS IA — fonctions du tableau de bord administrateur
+"use strict";
+
+function afficherCellule(tr, valeur) {
+    const td = document.createElement("td");
+    td.textContent = valeur ?? "-";
+    tr.appendChild(td);
+    return td;
+}
 
 async function chargerDashboard() {
-
     try {
-
-        const { data, error } =
-            await supabaseClient
-            .from("vue_dashboard_admin")
-            .select("*")
-            .single();
-
-        if(error){
-            console.error(error);
-            return;
-        }
-
-        document.getElementById(
-            "totalActifs"
-        ).textContent =
-            data.total_actifs || 0;
-
-        document.getElementById(
-            "totalAttente"
-        ).textContent =
-            data.total_attente || 0;
-
-        document.getElementById(
-            "totalExpires"
-        ).textContent =
-            data.total_expires || 0;
-
-        document.getElementById(
-            "recettesMois"
-        ).textContent =
-            (data.recettes_mensuelles || 0)
-            + " Ar";
-
-    }
-
-    catch(err){
-
-        console.error(err);
-    }
-
-    chargerDemandes();
-    chargerAdherentsActifs();
-    chargerTransactions();
-}
-
-
-// =====================================================
-// INSCRIPTIONS EN ATTENTE
-// =====================================================
-
-async function chargerDemandes(){
-
-    const zone =
-    document.getElementById(
-        "listeInscriptions"
-    );
-
-    try{
-
-        const { data, error } =
-
-        await supabaseClient
-
-        .from("vue_adherents_attente")
-
-        .select("*")
-
-        .order(
-            "date_adhesion",
-            {
-                ascending:false
-            }
-        );
-
-        if(error){
-
-            zone.innerHTML =
-            `
-            <tr>
-            <td colspan="4">
-            Erreur chargement
-            </td>
-            </tr>
-            `;
-
-            return;
-        }
-
-        if(!data.length){
-
-            zone.innerHTML =
-            `
-            <tr>
-            <td colspan="4">
-            Aucun ticket à valider
-            </td>
-            </tr>
-            `;
-
-            return;
-        }
-
-        let html = "";
-
-        data.forEach(eleve => {
-
-            html += `
-            <tr>
-
-                <td>${eleve.nom}</td>
-
-                <td>${eleve.prenom}</td>
-
-                <td>${eleve.classe}</td>
-
-                <td>
-
-                <button
-                onclick="activerTicket(
-                '${eleve.id}'
-                )">
-
-                ✅ Activer
-
-                </button>
-
-                </td>
-
-            </tr>
-            `;
-
+        const { data, error } = await supabaseClient
+            .from("vue_dashboard_admin").select("*").single();
+        if (error) throw error;
+        const valeurs = {
+            totalActifs: data.total_actifs ?? 0,
+            totalAttente: data.total_attente ?? 0,
+            totalExpires: data.total_expires ?? 0,
+            recettesMois: `${data.recettes_mensuelles ?? 0} Ar`
+        };
+        Object.entries(valeurs).forEach(([id, valeur]) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = valeur;
         });
-
-        zone.innerHTML = html;
-
+    } catch (err) {
+        console.error("Chargement statistiques admin :", err);
     }
 
-    catch(err){
-
-        console.error(err);
-    }
+    await Promise.all([
+        chargerDemandes(),
+        chargerAdherentsActifs(),
+        chargerTransactions()
+    ]);
 }
 
-
-// =====================================================
-// ACTIVER UN TICKET
-// =====================================================
-
-async function activerTicket(
-    utilisateurId
-){
-
-    const confirmation =
-    confirm(
-    "Activer ce ticket ?"
-    );
-
-    if(!confirmation){
-        return;
-    }
-
-    try{
-
-        // validation admin
-
-        await supabaseClient
-
-        .from("utilisateurs")
-
-        .update({
-            validation_admin:true
-        })
-
-        .eq(
-            "id",
-            utilisateurId
-        );
-
-        // récupération id statut actif
-
-        const { data: statutActif } =
-        await supabaseClient
-
-        .from("statuts_adhesion")
-
-        .select("id")
-
-        .eq("code","ACTIF")
-
-        .single();
-
-        if(statutActif){
-
-            await supabaseClient
-
-            .from("utilisateurs")
-
-            .update({
-                statut_adhesion_id:
-                statutActif.id
-            })
-
-            .eq(
-                "id",
-                utilisateurId
-            );
+async function chargerDemandes() {
+    const zone = document.getElementById("listeInscriptions");
+    if (!zone) return;
+    try {
+        const { data, error } = await supabaseClient
+            .from("vue_adherents_attente").select("*")
+            .order("date_adhesion", { ascending: false });
+        if (error) throw error;
+        zone.replaceChildren();
+        if (!data?.length) {
+            const tr = document.createElement("tr");
+            const td = afficherCellule(tr, "Aucun ticket à valider");
+            td.colSpan = 4;
+            zone.appendChild(tr);
+            return;
         }
-
-        alert(
-        "✅ Ticket activé"
-        );
-
-        chargerDashboard();
-
-    }
-
-    catch(err){
-
-        console.error(err);
-
-        alert(
-        "Erreur activation"
-        );
+        data.forEach(eleve => {
+            const tr = document.createElement("tr");
+            afficherCellule(tr, eleve.nom);
+            afficherCellule(tr, eleve.prenom);
+            afficherCellule(tr, eleve.classe);
+            const td = document.createElement("td");
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.textContent = "✅ Activer";
+            btn.addEventListener("click", () => activerTicket(eleve.id));
+            td.appendChild(btn);
+            tr.appendChild(td);
+            zone.appendChild(tr);
+        });
+    } catch (err) {
+        console.error("Demandes en attente :", err);
+        zone.textContent = "Erreur lors du chargement des inscriptions.";
     }
 }
 
+async function activerTicket(utilisateurId) {
+    if (!utilisateurId || !confirm("Activer ce ticket ?")) return;
+    try {
+        // Vérifier d'abord que le statut ACTIF existe.
+        const { data: statut, error: statutError } = await supabaseClient
+            .from("statuts_adhesion").select("id").eq("code", "ACTIF").maybeSingle();
+        if (statutError) throw statutError;
+        if (!statut) throw new Error("Le statut ACTIF est absent de statuts_adhesion.");
 
-// =====================================================
-// ADHERENTS ACTIFS
-// =====================================================
+        const { data: utilisateur, error: userError } = await supabaseClient
+            .from("utilisateurs").update({
+                validation_admin: true,
+                statut_adhesion_id: statut.id
+            }).eq("id", utilisateurId).select("id").maybeSingle();
+        if (userError) throw userError;
+        if (!utilisateur) throw new Error("Aucun utilisateur modifié. Vérifiez les droits RLS et l'identifiant.");
 
-async function chargerAdherentsActifs(){
-
-    const zone =
-    document.getElementById(
-        "listeActifs"
-    );
-
-    if(!zone){
-        return;
+        alert("✅ Ticket activé.");
+        await chargerDashboard();
+    } catch (err) {
+        console.error("Activation ticket :", err);
+        alert(`Erreur lors de l'activation : ${err.message || "erreur inconnue"}`);
     }
-
-    const { data, error } =
-
-    await supabaseClient
-
-    .from("vue_adherents_actifs")
-
-    .select("*");
-
-    if(error){
-
-        console.error(error);
-
-        return;
-    }
-
-    let html = "";
-
-    data.forEach(item => {
-
-        html += `
-
-        <tr>
-
-            <td>
-            ${item.nom}
-            </td>
-
-            <td>
-            ${item.prenom}
-            </td>
-
-            <td>
-            ${item.classe}
-            </td>
-
-            <td>
-            ${item.ticket}
-            </td>
-
-            <td>
-            ${item.date_expiration}
-            </td>
-
-        </tr>
-
-        `;
-
-    });
-
-    zone.innerHTML = html;
 }
 
-
-// =====================================================
-// TRANSACTIONS
-// =====================================================
-
-async function chargerTransactions(){
-
-    const zone =
-    document.getElementById(
-        "listeTransactions"
-    );
-
-    if(!zone){
-        return;
-    }
-
-    const { data } =
-
-    await supabaseClient
-
-    .from("transactions")
-
-    .select("*")
-
-    .order(
-        "date_transaction",
-        {
-            ascending:false
+async function chargerAdherentsActifs() {
+    const zone = document.getElementById("listeActifs");
+    if (!zone) return;
+    try {
+        const { data, error } = await supabaseClient
+            .from("vue_adherents_actifs").select("*");
+        if (error) throw error;
+        zone.replaceChildren();
+        if (!data?.length) {
+            const tr = document.createElement("tr");
+            const td = afficherCellule(tr, "Aucun adhérent actif");
+            td.colSpan = 5;
+            zone.appendChild(tr);
+            return;
         }
-    )
-
-    .limit(20);
-
-    let html = "";
-
-    data?.forEach(t => {
-
-        html += `
-
-        <tr>
-
-            <td>
-            ${t.numero_transaction}
-            </td>
-
-            <td>
-            ${t.montant} Ar
-            </td>
-
-            <td>
-            ${new Date(
-            t.date_transaction
-            ).toLocaleDateString(
-            "fr-FR"
-            )}
-            </td>
-
-        </tr>
-
-        `;
-
-    });
-
-    zone.innerHTML = html;
-}
-
-
-// =====================================================
-// RECALCUL DES EXPIRATIONS
-// =====================================================
-
-async function verifierExpirations(){
-
-    const aujourdHui =
-    new Date()
-    .toISOString()
-    .split("T")[0];
-
-    const { data } =
-
-    await supabaseClient
-
-    .from("adhesions")
-
-    .select("*")
-
-    .lt(
-        "date_expiration",
-        aujourdHui
-    );
-
-    console.log(
-        "Adhésions expirées :",
-        data
-    );
-}
-
-
-// =====================================================
-// ARCHIVAGE DU MOIS D'AOUT
-// =====================================================
-
-async function archivageAnnuel(){
-
-    const mois =
-    new Date().getMonth() + 1;
-
-    if(mois !== 8){
-
-        return;
+        data.forEach(item => {
+            const tr = document.createElement("tr");
+            afficherCellule(tr, item.nom);
+            afficherCellule(tr, item.prenom);
+            afficherCellule(tr, item.classe);
+            afficherCellule(tr, item.ticket);
+            afficherCellule(tr, formatDate(item.date_expiration));
+            zone.appendChild(tr);
+        });
+    } catch (err) {
+        console.error("Adhérents actifs :", err);
+        zone.textContent = "Erreur lors du chargement des adhérents actifs.";
     }
-
-    alert(
-    "Archivage annuel à lancer."
-    );
-
-    /*
-      ici :
-      UPDATE utilisateurs
-      SET archive=true
-    */
 }
 
-
-// =====================================================
-// GENERATION DE CARTE
-// =====================================================
-
-async function genererCarte(
-    utilisateurId
-){
-
-    console.log(
-      "Carte pour :",
-      utilisateurId
-    );
-
-    /*
-    futur module :
-
-    QR Code
-
-    PDF
-
-    Email
-
-    */
+async function chargerTransactions() {
+    const zone = document.getElementById("listeTransactions");
+    if (!zone) return;
+    try {
+        const { data, error } = await supabaseClient
+            .from("transactions").select("numero_transaction,montant,date_transaction")
+            .order("date_transaction", { ascending: false }).limit(20);
+        if (error) throw error;
+        zone.replaceChildren();
+        if (!data?.length) {
+            const tr = document.createElement("tr");
+            const td = afficherCellule(tr, "Aucune transaction");
+            td.colSpan = 3;
+            zone.appendChild(tr);
+            return;
+        }
+        data.forEach(t => {
+            const tr = document.createElement("tr");
+            afficherCellule(tr, t.numero_transaction);
+            afficherCellule(tr, `${t.montant ?? 0} Ar`);
+            afficherCellule(tr, formatDate(t.date_transaction));
+            zone.appendChild(tr);
+        });
+    } catch (err) {
+        console.error("Transactions :", err);
+        zone.textContent = "Erreur lors du chargement des transactions.";
+    }
 }
 
-
-// =====================================================
-// STATISTIQUES RAPIDES
-// =====================================================
-
-async function chargerStatsSexe(){
-
-    const { data } =
-
-    await supabaseClient
-
-    .from(
-    "vue_stat_classe_sexe"
-    )
-
-    .select("*");
-
-    console.table(data);
+async function verifierExpirations() {
+    try {
+        const aujourdHui = new Date().toISOString().slice(0, 10);
+        const { data, error } = await supabaseClient.from("adhesions")
+            .select("id,ticket,date_expiration").lt("date_expiration", aujourdHui);
+        if (error) throw error;
+        console.log("Adhésions expirées :", data || []);
+        return data || [];
+    } catch (err) {
+        console.error("Vérification expirations :", err);
+        return [];
+    }
 }
+
+// Cette fonction informe seulement : elle ne modifie/ archive aucune donnée.
+async function archivageAnnuel() {
+    if (new Date().getMonth() + 1 !== 8) return false;
+    alert("L'archivage annuel doit être réalisé par une procédure serveur sécurisée.");
+    return false;
+}
+
+async function genererCarte(utilisateurId) {
+    console.info("Génération de carte à implémenter côté serveur pour :", utilisateurId);
+    alert("La génération de carte n'est pas encore implémentée.");
+}
+
+async function chargerStatsSexe() {
+    try {
+        const { data, error } = await supabaseClient
+            .from("vue_stat_classe_sexe").select("*");
+        if (error) throw error;
+        console.table(data || []);
+        return data || [];
+    } catch (err) {
+        console.error("Statistiques sexe :", err);
+        return [];
+    }
+}
+
+Object.assign(window, {
+    chargerDashboard, chargerDemandes, activerTicket, chargerAdherentsActifs,
+    chargerTransactions, verifierExpirations, archivageAnnuel,
+    genererCarte, chargerStatsSexe
+});

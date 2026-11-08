@@ -1,344 +1,115 @@
-console.log("✅ inscription.js chargé");
+// PHILOCOURS IA — inscription élève
+"use strict";
 
-// =====================================================
-// EMAIL
-// =====================================================
-
-function emailValide(email){
-
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    .test(email);
-
+function emailValide(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-// =====================================================
-// NORMALISATION
-// =====================================================
-
-function normaliserClasse(classe){
-
-    const valeur = classe.trim();
-
-    if(valeur === "Première" || valeur === "Premiere"){
-        return "Premiere";
-    }
-
-    if(valeur === "Terminale"){
-        return "Terminale";
-    }
-
+function normaliserClasse(classe) {
+    const valeur = String(classe || "").trim().toLowerCase();
+    if (valeur === "première" || valeur === "premiere") return "Premiere";
+    if (valeur === "terminale") return "Terminale";
     return null;
 }
 
-function normaliserSexe(sexe){
-
-    const valeur = sexe.trim().toUpperCase();
-
-    if(["M", "HOMME", "MASCULIN"].includes(valeur)){
-        return "M";
-    }
-
-    if(["F", "FEMME", "FEMININ", "FÉMININ"].includes(valeur)){
-        return "F";
-    }
-
+function normaliserSexe(sexe) {
+    const valeur = String(sexe || "").trim().toUpperCase();
+    if (["M", "HOMME", "MASCULIN"].includes(valeur)) return "M";
+    if (["F", "FEMME", "FEMININ", "FÉMININ"].includes(valeur)) return "F";
     return null;
 }
 
-// =====================================================
-// AFFICHAGE ERREURS
-// =====================================================
-
-function afficherErreur(message){
-
+function afficherErreur(message) {
     const zone = document.getElementById("errors");
-
-    if(zone){
-
-        zone.innerHTML = `
-            <div class="error-box">
-                ${message}
-            </div>
-        `;
-    }
+    if (zone) zone.innerHTML = `<div class="error-box">${escapeHTML(message)}</div>`;
 }
 
-// =====================================================
-// INSCRIPTION
-// =====================================================
-
-async function inscrireEleve(){
-
-    console.log("✅ Bouton inscription cliqué");
-
+async function inscrireEleve() {
     const erreurs = [];
+    const valeur = id => document.getElementById(id)?.value?.trim() || "";
 
-    const nom =
-    document.getElementById("nom")?.value.trim();
+    const nom = valeur("nom");
+    const prenom = valeur("prenom");
+    const sexe = normaliserSexe(valeur("sexe"));
+    const email = valeur("email").toLowerCase();
+    const telephone = valeur("telephone");
+    const dateNaissance = valeur("date_naissance");
+    const classe = normaliserClasse(valeur("classe"));
+    const transaction = valeur("transaction");
+    const reference = valeur("reference");
 
-    const prenom =
-    document.getElementById("prenom")?.value.trim();
+    if (!nom) erreurs.push("Nom obligatoire.");
+    if (!prenom) erreurs.push("Prénom obligatoire.");
+    if (!sexe) erreurs.push("Sexe invalide.");
+    if (!emailValide(email)) erreurs.push("Adresse e-mail invalide.");
+    if (!telephone) erreurs.push("Téléphone obligatoire.");
+    if (!dateNaissance) erreurs.push("Date de naissance obligatoire.");
+    else {
+        const [annee, mois, jour] = dateNaissance.split("-").map(Number);
+        const d = new Date(annee, mois - 1, jour);
+        if (d.getFullYear() !== annee || d.getMonth() !== mois - 1 ||
+            d.getDate() !== jour || d > new Date()) {
+            erreurs.push("Date de naissance invalide.");
+        }
+    }
+    if (!classe) erreurs.push("Classe invalide.");
+    if (!transaction) erreurs.push("Numéro de transaction obligatoire.");
+    if (reference !== "PHILOCOURS") erreurs.push("Référence incorrecte.");
 
-    const sexe =
-    normaliserSexe(
-        document.getElementById("sexe")?.value || ""
-    );
-
-    const email =
-    document.getElementById("email")?.value.trim().toLowerCase();
-
-    const telephone =
-    document.getElementById("telephone")?.value.trim();
-
-    const dateNaissance =
-    document.getElementById("date_naissance")?.value;
-
-    const classe =
-    normaliserClasse(
-        document.getElementById("classe")?.value || ""
-    );
-
-    const transaction =
-    document.getElementById("transaction")?.value.trim();
-
-    const reference =
-    document.getElementById("reference")?.value.trim();
-
-    // =================================================
-    // VALIDATIONS
-    // =================================================
-
-    if(!nom)
-        erreurs.push("Nom obligatoire");
-
-    if(!prenom)
-        erreurs.push("Prénom obligatoire");
-
-    if(!sexe)
-        erreurs.push("Sexe invalide");
-
-    if(!email || !emailValide(email))
-        erreurs.push("Email invalide");
-
-    if(!telephone)
-        erreurs.push("Téléphone obligatoire");
-
-    if(!dateNaissance)
-        erreurs.push("Date de naissance obligatoire");
-
-    if(dateNaissance &&
-       !/^\d{4}-\d{2}-\d{2}$/.test(dateNaissance))
-        erreurs.push("Date de naissance invalide");
-
-    if(!classe)
-        erreurs.push("Classe invalide");
-
-    if(!transaction)
-        erreurs.push("Numéro de transaction obligatoire");
-
-    if(reference !== "PHILOCOURS")
-        erreurs.push("Référence incorrecte");
-
-    if(erreurs.length){
-
-        afficherErreur(erreurs.join("<br>"));
-
+    if (erreurs.length) {
+        afficherErreur(erreurs.join(" "));
+        return;
+    }
+    if (!window.supabaseClient?.functions) {
+        afficherErreur("Connexion au serveur indisponible.");
         return;
     }
 
-    // =================================================
-    // VERIFICATION SUPABASE
-    // =================================================
-
-    if(typeof supabaseClient === "undefined"){
-
-        afficherErreur(
-            "Connexion au serveur indisponible."
-        );
-
-        return;
-    }
-
-    // =================================================
-    // APPEL SERVEUR
-    // =================================================
-
-    const bouton = document.querySelector(
-        '[onclick="inscrireEleve()"]'
-    );
-
-    if(bouton){
-
+    const bouton = document.querySelector('[onclick="inscrireEleve()"]');
+    const zoneSuccess = document.getElementById("success");
+    if (bouton) {
         bouton.disabled = true;
         bouton.textContent = "Inscription en cours...";
     }
+    if (zoneSuccess) zoneSuccess.textContent = "";
 
-    try{
-
-        console.log("👤 Envoi de la demande...");
-
-        const {
-
-            data,
-            error
-
-        } = await supabaseClient.functions.invoke(
-
+    try {
+        const { data, error } = await window.supabaseClient.functions.invoke(
             "inscrire-eleve",
-
-            {
-
-                body: {
-
-                    nom,
-                    prenom,
-                    sexe,
-                    email,
-                    telephone,
-                    date_naissance: dateNaissance,
-                    classe,
-                    transaction,
-                    reference
-
-                }
-
-            }
-
+            { body: { nom, prenom, sexe, email, telephone,
+                date_naissance: dateNaissance, classe, transaction, reference } }
         );
+        if (error) throw new Error(error.message || "Impossible de traiter l'inscription.");
+        if (!data?.success) throw new Error(data?.error || "Échec de l'inscription.");
 
-        if(error){
-
-            console.error(
-                "❌ ERREUR SERVEUR",
-                error
-            );
-
-            throw new Error(
-                error.message ||
-                "Impossible de traiter l'inscription."
-            );
-
-        }
-
-        if(!data || !data.success){
-
-            throw new Error(
-                data?.error ||
-                "Échec de l'inscription."
-            );
-
-        }
-
-        // =============================================
-        // SUCCÈS
-        // =============================================
-
-        console.log(
-            "✅ INSCRIPTION ENREGISTRÉE",
-            data
-        );
-
-        const zone = document.getElementById("success");
-
-        if(zone){
-
-            zone.innerHTML = `
-
+        if (zoneSuccess) {
+            zoneSuccess.innerHTML = `
                 <div class="success">
-
-                    ✅ Inscription enregistrée !
-
-                    <br><br>
-
-                    Ticket :
-
-                    <strong>
-                        ${data.ticket}
-                    </strong>
-
-                    <br><br>
-
-                    Transaction :
-
-                    <strong>
-                        ${transaction}
-                    </strong>
-
-                    <br><br>
-
-                    Votre demande est en attente
-                    de validation administrateur.
-
-                    <br><br>
-
-                    Redirection vers la connexion...
-
-                </div>
-
-            `;
-
+                    ✅ Inscription enregistrée !<br><br>
+                    Ticket : <strong>${escapeHTML(data.ticket || "En attente de génération")}</strong><br><br>
+                    Transaction : <strong>${escapeHTML(transaction)}</strong><br><br>
+                    Votre demande est en attente de validation administrateur.
+                </div>`;
         }
+        const errors = document.getElementById("errors");
+        if (errors) errors.textContent = "";
 
-        const zoneErreur =
-        document.getElementById("errors");
-
-        if(zoneErreur){
-            zoneErreur.innerHTML = "";
+        if (data.ticket) {
+            setTimeout(() => {
+                if (typeof window.showSection === "function") window.showSection("connexion");
+                const field = document.getElementById("loginTicket");
+                if (field) field.value = data.ticket;
+            }, 2500);
         }
-
-        // =============================================
-        // REDIRECTION
-        // =============================================
-
-        setTimeout(() => {
-
-            if(typeof showSection === "function"){
-
-                showSection("connexion");
-
-            }
-
-            const loginField =
-            document.getElementById("loginTicket");
-
-            if(loginField){
-
-                loginField.value = data.ticket;
-
-            }
-
-        }, 3000);
-
-    }
-
-    catch(err){
-
-        console.error(
-            "💥 ERREUR COMPLETE",
-            err
-        );
-
-        afficherErreur(
-            err.message
-        );
-
-    }
-
-    finally{
-
-        if(bouton){
-
+    } catch (err) {
+        console.error("Erreur inscription :", err);
+        afficherErreur(err.message || "Une erreur est survenue.");
+    } finally {
+        if (bouton) {
             bouton.disabled = false;
             bouton.textContent = "Valider mon inscription";
-
         }
-
     }
-
 }
-
-// =====================================================
-// EXPORT GLOBAL
-// =====================================================
 
 window.inscrireEleve = inscrireEleve;
