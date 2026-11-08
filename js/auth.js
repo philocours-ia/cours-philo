@@ -1,8 +1,8 @@
 console.log("✅ AUTH.JS CHARGE");
 
-// =====================================
-// SUPABASE
-// =====================================
+// =====================================================
+// CONFIGURATION SUPABASE
+// =====================================================
 
 const SUPABASE_URL =
 "https://mwwzftnjetzaeesmrfxw.supabase.co";
@@ -10,15 +10,19 @@ const SUPABASE_URL =
 const SUPABASE_ANON_KEY =
 "sb_publishable_G6aD0xWT57oCgf-j9PAQeg_3wGZD0RI";
 
+// =====================================================
+// INITIALISATION
+// =====================================================
+
 const supabaseClient =
 supabase.createClient(
     SUPABASE_URL,
     SUPABASE_ANON_KEY
 );
 
-// =====================================
+// =====================================================
 // TEST
-// =====================================
+// =====================================================
 
 async function testConnexion(){
 
@@ -31,11 +35,15 @@ async function testConnexion(){
         .limit(1);
 
         if(error){
+
             console.error(error);
+
             return false;
         }
 
-        console.log("✅ Supabase connecté");
+        console.log(
+            "✅ Connexion Supabase OK"
+        );
 
         return true;
 
@@ -47,9 +55,9 @@ async function testConnexion(){
     }
 }
 
-// =====================================
+// =====================================================
 // RECHERCHE TICKET
-// =====================================
+// =====================================================
 
 async function rechercherTicket(ticket){
 
@@ -75,13 +83,10 @@ async function rechercherTicket(ticket){
     return data;
 }
 
-// =====================================
+// =====================================================
 // RECHERCHE UTILISATEUR
-// =====================================
+// =====================================================
 
-async function rechercherUtilisateur(id){
-
-    const { data, error } =
 async function rechercherUtilisateur(id){
 
     const { data, error } =
@@ -94,7 +99,7 @@ async function rechercherUtilisateur(id){
 
     .eq("id", id)
 
-    .single*);
+    .single();
 
     if(error){
 
@@ -105,14 +110,10 @@ async function rechercherUtilisateur(id){
 
     return data;
 }
-    }
 
-    return data;
-}
-
-// ==*==================================
-// CONTROLE D'ACCES
-// =====================================
+// =====================================================
+// CONTROLE ACCES
+// =====================================================
 
 async function verifierAcces(ticket){
 
@@ -122,8 +123,12 @@ async function verifierAcces(ticket){
     if(!adhesion){
 
         return {
+
             autorise:false,
-            message:"Ticket introuvable"
+
+            message:
+            "Ticket introuvable"
+
         };
     }
 
@@ -135,8 +140,12 @@ async function verifierAcces(ticket){
     if(!utilisateur){
 
         return {
+
             autorise:false,
-            message:"Utilisateur introuvable"
+
+            message:
+            "Utilisateur introuvable"
+
         };
     }
 
@@ -146,9 +155,12 @@ async function verifierAcces(ticket){
     ){
 
         return {
+
             autorise:false,
+
             message:
-            "En attente de validation administrateur."
+            "Votre ticket est en attente de validation administrateur."
+
         };
     }
 
@@ -159,12 +171,13 @@ async function verifierAcces(ticket){
         utilisateur,
 
         adhesion
+
     };
 }
 
-// =====================================
-// LOGIN
-// =====================================
+// =====================================================
+// CONNEXION ELEVE
+// =====================================================
 
 async function loginEleve(ticket){
 
@@ -195,9 +208,9 @@ async function loginEleve(ticket){
     return true;
 }
 
-// =====================================
-// SESSION
-// =====================================
+// =====================================================
+// UTILISATEUR CONNECTE
+// =====================================================
 
 function utilisateurCourant(){
 
@@ -214,9 +227,9 @@ function utilisateurCourant(){
     return JSON.parse(user);
 }
 
-// =====================================
-// LOGOUT
-// =====================================
+// =====================================================
+// DECONNEXION
+// =====================================================
 
 function logout(){
 
@@ -226,9 +239,12 @@ function logout(){
     "index.html";
 }
 
-// =====================================
+// =====================================================
 // EXPORT GLOBAL
-// =====================================
+// =====================================================
+
+window.supabaseClient =
+supabaseClient;
 
 window.loginEleve =
 loginEleve;
@@ -242,5 +258,4 @@ utilisateurCourant;
 window.verifierAcces =
 verifierAcces;
 
-window.supabaseClient =
-supabaseClient;
+console.log("✅ FIN AUTH");
