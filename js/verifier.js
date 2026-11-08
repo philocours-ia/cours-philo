@@ -1,102 +1,62 @@
-/* PHILOCOURS IA — vérification publique d'un ticket */
-(function () {
-  "use strict";
+// PHILOCOURS IA — vérification publique d'un ticket / QR
+"use strict";
 
-  function obtenirTicketURL() {
-    try {
-      return new URLSearchParams(window.location.search).get("ticket") || "";
-    } catch (_) {
-      return "";
-    }
-  }
+function getTicketURL() {
+    return new URLSearchParams(window.location.search).get("ticket");
+}
 
-  function afficherEtat(zone, message, classe) {
-    const bloc = document.createElement("div");
-    bloc.className = classe;
-    bloc.textContent = message;
-    zone.replaceChildren(bloc);
-  }
-
-  async function verifierTicketQR(ticketFourni) {
+async function verifierTicketQR() {
+    const ticket = getTicketURL();
     const zone = document.getElementById("contenu");
-    if (!zone) return null;
-
-    const ticket = window.normaliserTicket
-      ? window.normaliserTicket(ticketFourni || obtenirTicketURL())
-      : String(ticketFourni || obtenirTicketURL()).trim().toUpperCase();
+    if (!zone) return;
 
     if (!ticket) {
-      afficherEtat(zone, "Aucun ticket n'a été fourni.", "error");
-      return null;
+        zone.innerHTML = '<div class="error">Aucun ticket fourni.</div>';
+        return;
     }
 
-    zone.textContent = "Vérification du ticket en cours…";
-
+    zone.textContent = "Vérification en cours...";
     try {
-      if (!window.supabaseClient) throw new Error("Client Supabase non initialisé.");
-      const { data, error } = await window.supabaseClient
-        .from("vue_eleves")
-        .select("*")
-        .eq("ticket", ticket)
-        .limit(2);
+        const { data, error } = await supabaseClient
+            .from("vue_eleves").select("nom,prenom,classe,ticket,date_expiration,validation_admin,statut")
+            .eq("ticket", ticket.trim()).maybeSingle();
+        if (error) throw error;
+        if (!data) {
+            zone.innerHTML = '<div class="error">❌ Carte inconnue.</div>';
+            return;
+        }
 
-      if (error) throw error;
-      if (!data?.length) {
-        afficherEtat(zone, "Ticket inconnu ou non accessible.", "error");
-        return null;
-      }
-      if (data.length > 1) {
-        afficherEtat(zone, "Ce ticket est associé à plusieurs dossiers. Contactez l'administrateur.", "error");
-        return null;
-      }
+        // Comparer une date d'expiration sans heure comme une date entière inclusive.
+        const dateExpiration = data.date_expiration
+            ? new Date(`${String(data.date_expiration).slice(0,10)}T23:59:59`)
+            : null;
+        const dateValide = dateExpiration && !Number.isNaN(dateExpiration.getTime()) &&
+            dateExpiration >= new Date();
+        const statutValide = !data.statut ||
+            String(data.statut).toLowerCase() === "actif";
+        const actif = Boolean(data.validation_admin) && Boolean(dateValide) && statutValide;
 
-      const eleve = data[0];
-      const validation = eleve.validation_admin;
-      const statut = window.normaliserTexte
-        ? window.normaliserTexte(eleve.statut)
-        : String(eleve.statut || "").toLowerCase();
-      const statutActif = statut === "actif" || statut === "active";
-      const validationOK = validation === true || (validation == null && statutActif);
-      const statutOK = !statut || statutActif;
-      const expirationOK = !eleve.date_expiration || !(window.dateEstExpiree
-        ? window.dateEstExpiree(eleve.date_expiration)
-        : new Date(`${String(eleve.date_expiration).slice(0, 10)}T23:59:59`).getTime() < Date.now());
-      const estActif = validation !== false && validationOK && statutOK && expirationOK;
-
-      const bloc = document.createElement("div");
-      const ajouterLigne = function (libelle, valeur) {
-        const ligne = document.createElement("div");
-        ligne.className = "row";
-        const etiquette = document.createElement("strong");
-        etiquette.textContent = `${libelle} : `;
-        const contenu = document.createElement("span");
-        contenu.textContent = valeur == null || valeur === "" ? "-" : String(valeur);
-        ligne.append(etiquette, contenu);
-        bloc.appendChild(ligne);
-      };
-
-      ajouterLigne("Nom", `${eleve.nom || ""} ${eleve.prenom || ""}`.trim());
-      ajouterLigne("Classe", eleve.classe || "-");
-      ajouterLigne("Ticket", eleve.ticket || ticket);
-      ajouterLigne("Expiration", window.formatDate?.(eleve.date_expiration) || eleve.date_expiration || "Non définie");
-
-      const resultat = document.createElement("div");
-      resultat.className = estActif ? "success" : "error";
-      resultat.textContent = estActif
-        ? "✅ Adhésion active et ticket valide."
-        : (expirationOK
-          ? "❌ Adhésion en attente de validation ou inactive."
-          : "❌ Adhésion expirée.");
-      bloc.appendChild(resultat);
-      zone.replaceChildren(bloc);
-      return { eleve, actif: estActif };
-    } catch (error) {
-      console.error("Vérification publique du ticket :", error);
-      afficherEtat(zone, "Impossible de vérifier le ticket. Vérifiez la vue vue_eleves et ses règles RLS.", "error");
-      return null;
+        const nom = document.createElement("div");
+        nom.className = "row";
+        nom.textContent = `Nom : ${data.nom || ""} ${data.prenom || ""}`;
+        const classe = document.createElement("div");
+        classe.className = "row";
+        classe.textContent = `Classe : ${data.classe || "-"}`;
+        const ticketEl = document.createElement("div");
+        ticketEl.className = "row";
+        ticketEl.textContent = `Ticket : ${data.ticket || "-"}`;
+        const expiration = document.createElement("div");
+        expiration.className = "row";
+        expiration.textContent = `Expiration : ${formatDate(data.date_expiration)}`;
+        const status = document.createElement("div");
+        status.className = actif ? "success" : "error";
+        status.textContent = actif ? "✅ Adhésion active" : "❌ Adhésion expirée ou non validée";
+        zone.replaceChildren(nom, classe, ticketEl, expiration, status);
+    } catch (err) {
+        console.error("Vérification ticket :", err);
+        zone.innerHTML = '<div class="error">Erreur de vérification. Réessayez plus tard.</div>';
     }
-  }
+}
 
-  window.obtenirTicketURL = obtenirTicketURL;
-  window.verifierTicketQR = verifierTicketQR;
-})();
+window.getTicketURL = getTicketURL;
+window.verifierTicketQR = verifierTicketQR;
