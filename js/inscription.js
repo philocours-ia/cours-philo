@@ -1,131 +1,106 @@
-console
 console.log("✅ inscription.js chargé");
 
-// =======================================
-// Génération ticket
-// =======================================
+// =====================================================
+// GENERATION TICKET
+// =====================================================
 
-function genererTicket(classe) {
+function genererTicket(classe){
 
-    if (classe === "Premiere") {
+    const aleatoire =
+    Math.floor(
+        100000 + Math.random() * 900000
+    );
 
-        return "PH-P-" +
-            Math.floor(
-                100000 +
-                Math.random() * 900000
-            );
+    if(classe === "Premiere"){
+
+        return `PH-P-${aleatoire}`;
     }
 
-    return "PH-T-" +
-        Math.floor(
-            10000000 +
-            Math.random() * 90000000
-        );
+    return `PH-T-${aleatoire}`;
 }
 
-// =======================================
-// Validation email
-// =======================================
+// =====================================================
+// VALIDATION EMAIL
+// =====================================================
 
-function emailValide(email) {
+function emailValide(email){
 
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-        .test(email);
+    const regex =
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    return regex.test(email);
 }
 
-// =======================================
+// =====================================================
 // INSCRIPTION
-// =======================================
+// =====================================================
 
-async function inscrireEleve() {
+async function inscrireEleve(){
 
     console.log(
         "✅ Bouton inscription cliqué"
     );
 
     const nom =
-        document.getElementById("nom")
-        .value.trim();
+    document.getElementById("nom")?.value.trim();
 
     const prenom =
-        document.getElementById("prenom")
-        .value.trim();
+    document.getElementById("prenom")?.value.trim();
 
     const sexe =
-        document.getElementById("sexe")
-        .value;
+    document.getElementById("sexe")?.value;
 
     const email =
-        document.getElementById("email")
-        .value.trim();
+    document.getElementById("email")?.value.trim();
 
     const telephone =
-        document.getElementById("telephone")
-        .value.trim();
+    document.getElementById("telephone")?.value.trim();
 
     const dateNaissance =
-        document.getElementById(
-            "date_naissance"
-        ).value;
+    document.getElementById("date_naissance")?.value;
 
     const classe =
-        document.getElementById("classe")
-        .value;
+    document.getElementById("classe")?.value;
 
     const reference =
-        document.getElementById(
-            "reference"
-        ).value.trim();
+    document.getElementById("reference")?.value.trim();
 
     const transaction =
-        document.getElementById(
-            "transaction"
-        ).value.trim();
+    document.getElementById("transaction")?.value.trim();
 
     const erreurs = [];
 
-    if (!nom)
-        erreurs.push(
-            "Nom obligatoire"
-        );
+    if(!nom)
+        erreurs.push("Nom obligatoire");
 
-    if (!prenom)
-        erreurs.push(
-            "Prénom obligatoire"
-        );
+    if(!prenom)
+        erreurs.push("Prénom obligatoire");
 
-    if (!emailValide(email))
-        erreurs.push(
-            "Email invalide"
-        );
+    if(!emailValide(email))
+        erreurs.push("Email invalide");
 
-    if (telephone.length < 10)
-        erreurs.push(
-            "Téléphone invalide"
-        );
+    if(!telephone)
+        erreurs.push("Téléphone obligatoire");
 
-    if (
-        reference.toUpperCase()
-        !== "PHILOCOURS"
-    ) {
+    if(!dateNaissance)
+        erreurs.push("Date de naissance obligatoire");
+
+    if(reference !== "PHILOCOURS")
         erreurs.push(
             "La référence doit être PHILOCOURS"
         );
-    }
 
-    if (transaction.length < 8) {
-
+    if(!transaction)
         erreurs.push(
-            "Transaction invalide"
+            "Numéro de transaction obligatoire"
         );
 
-    }
-
-    if (erreurs.length > 0) {
+    if(erreurs.length){
 
         document.getElementById(
             "errors"
         ).innerHTML =
+
         `
         <div class="error-box">
             ${erreurs.join("<br>")}
@@ -136,59 +111,81 @@ async function inscrireEleve() {
     }
 
     const ticket =
-        genererTicket(classe);
+    genererTicket(classe);
 
-    try {
+    console.log(
+        "🎫 Ticket généré :",
+        ticket
+    );
 
-        // ==================================
-        // Sauvegarde Supabase
-        // ==================================
+    try{
 
-        const { error } =
+        console.log(
+            "🚀 Insertion utilisateur..."
+        );
+
+        const { data, error } =
 
         await supabaseClient
 
         .from("utilisateurs")
 
-        .insert({
+        .insert([{
 
             nom,
-
             prenom,
-
             sexe,
-
             email,
-
             telephone,
 
             date_naissance:
-                dateNaissance,
+            dateNaissance,
 
             classe,
 
             ticket_actuel:
-                ticket,
+            ticket,
 
             validation_admin:
-                false
+            false
 
-        });
+        }])
+
+        .select();
+
+        // =================================================
+        // ERREUR SUPABASE
+        // =================================================
 
         if(error){
 
-            console.error(error);
+            console.error(
+                "❌ ERREUR SUPABASE",
+                error
+            );
 
             alert(
-                "Erreur lors de l'inscription"
+
+                "Erreur Supabase :\n\n"
+
+                + error.message +
+
+                "\n\nCode : "
+
+                + (
+                    error.code
+                    || "Aucun"
+                )
+
             );
 
             return;
         }
 
-        // ==================================
-        // Message succès
-        // ==================================
+        console.log(
+            "✅ Utilisateur créé",
+            data
+        );
 
         document.getElementById(
             "success"
@@ -207,27 +204,35 @@ async function inscrireEleve() {
 
             <br><br>
 
-            Votre demande est en attente
-            de validation par
-            l'administrateur.
-
-            <br><br>
-
-            Vous allez être redirigé
-            vers la page de connexion.
+            En attente de validation
+            administrateur.
 
         </div>
         `;
 
-        // ==================================
-        // Redirection
-        // ==================================
-
         setTimeout(() => {
 
-            showSection(
+            const connexion =
+            document.getElementById(
                 "connexion"
             );
+
+            const inscription =
+            document.getElementById(
+                "inscription"
+            );
+
+            if(
+                connexion &&
+                inscription
+            ){
+
+                inscription.classList
+                .add("hidden");
+
+                connexion.classList
+                .remove("hidden");
+            }
 
             const champTicket =
             document.getElementById(
@@ -237,27 +242,36 @@ async function inscrireEleve() {
             if(champTicket){
 
                 champTicket.value =
-                    ticket;
+                ticket;
             }
 
-        }, 3000);
+        },3000);
 
     }
 
     catch(err){
 
-        console.error(err);
-
-        alert(
-            "Erreur inattendue"
+        console.error(
+            "💥 ERREUR COMPLETE",
+            err
         );
 
+        alert(
+
+            "Erreur technique :\n\n"
+
+            + (
+                err.message
+                || JSON.stringify(err)
+            )
+
+        );
     }
 }
 
-// =======================================
-// Disponible partout
-// =======================================
+// =====================================================
+// EXPORT GLOBAL
+// =====================================================
 
 window.inscrireEleve =
 inscrireEleve;
