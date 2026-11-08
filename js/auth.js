@@ -256,3 +256,4 @@ window.loginEleve = loginEleve;
 window.logout = logout;
 window.utilisateurCourant = utilisateurCourant;
 window.verifierAcces = verifierAcces;
+console.log("FIN AUTH");
