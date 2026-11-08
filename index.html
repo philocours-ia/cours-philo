@@ -1,517 +1,356 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0D1B2A">
+  <meta name="description" content="PHILOCOURS IA — La philosophie intelligente au service de votre réussite scolaire.">
+  <title>PHILOCOURS IA</title>
 
-<meta charset="UTF-8">
+  <style>
+    :root {
+      --blue: #0D1B2A;
+      --blue-2: #1B263B;
+      --gold: #D4AF37;
+      --gold-hover: #e5c454;
+      --success: #166534;
+      --danger: #991B1B;
+      --text: #F8FAFC;
+      --muted: #CBD5E1;
+      --panel: rgba(255, 255, 255, 0.08);
+      --border: rgba(255, 255, 255, 0.15);
+      --focus: rgba(212, 175, 55, 0.35);
+    }
 
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-<title>PHILOCOURS IA</title>
+    html { scroll-behavior: smooth; }
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    body {
+      min-height: 100vh;
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+      color: var(--text);
+      background: linear-gradient(135deg, var(--blue), var(--blue-2));
+      line-height: 1.6;
+    }
 
-<style>
+    button, input, select { font: inherit; }
 
-:root{
---blue:#0D1B2A;
---blue2:#1B263B;
---gold:#D4AF37;
---success:#166534;
---danger:#991B1B;
-}
+    .container {
+      width: min(1100px, calc(100% - 36px));
+      margin: 0 auto;
+      padding: 36px 0 24px;
+    }
 
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-}
+    .hero {
+      padding: 58px 16px 42px;
+      text-align: center;
+    }
 
-body{
-font-family:Inter,sans-serif;
-background:linear-gradient(
-135deg,
-var(--blue),
-var(--blue2)
-);
-color:white;
-min-height:100vh;
-}
+    .hero h1 {
+      margin-bottom: 16px;
+      color: var(--gold);
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: clamp(2.4rem, 7vw, 4.2rem);
+      line-height: 1.15;
+      letter-spacing: 0.02em;
+    }
 
-.container{
-width:min(1200px,90%);
-margin:auto;
-padding:40px 0;
-}
+    .hero p {
+      max-width: 680px;
+      margin: 0 auto;
+      color: var(--muted);
+      line-height: 1.8;
+    }
 
-.hero{
-text-align:center;
-padding:50px 0;
-}
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 14px;
+      margin-top: 30px;
+    }
 
-.hero h1{
-font-family:Playfair Display,serif;
-font-size:4rem;
-color:var(--gold);
-margin-bottom:20px;
-}
+    button {
+      min-height: 44px;
+      padding: 11px 22px;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      background: var(--gold);
+      color: #17202b;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    }
 
-.hero p{
-max-width:700px;
-margin:auto;
-line-height:1.8;
-}
+    button:hover {
+      background: var(--gold-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+    }
 
-.actions{
-margin-top:35px;
-display:flex;
-justify-content:center;
-gap:15px;
-flex-wrap:wrap;
-}
+    button:focus-visible,
+    input:focus-visible,
+    select:focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 2px;
+    }
 
-button{
-background:var(--gold);
-border:none;
-padding:12px 25px;
-border-radius:10px;
-cursor:pointer;
-font-weight:bold;
-}
+    .card {
+      width: min(100%, 720px);
+      margin: 0 auto 26px;
+      padding: clamp(20px, 4vw, 32px);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: var(--panel);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
+      backdrop-filter: blur(10px);
+    }
 
-button:hover{
-opacity:.9;
-}
+    .card h2 {
+      margin-bottom: 18px;
+      color: var(--gold);
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: 1.7rem;
+    }
 
-.card{
-background:rgba(255,255,255,.08);
-backdrop-filter:blur(10px);
-padding:25px;
-border-radius:15px;
-margin-bottom:25px;
-}
+    .hidden { display: none !important; }
 
-.hidden{
-display:none;
-}
+    label {
+      display: block;
+      margin: 0 0 16px;
+      color: var(--text);
+      font-weight: 500;
+    }
 
-label{
-display:block;
-margin-bottom:15px;
-}
+    input, select {
+      display: block;
+      width: 100%;
+      min-height: 44px;
+      margin-top: 7px;
+      padding: 10px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 9px;
+      background: rgba(255, 255, 255, 0.96);
+      color: #17202b;
+    }
 
-input,
-select{
-width:100%;
-padding:10px;
-border:none;
-border-radius:8px;
-margin-top:6px;
-}
+    input[type="file"] { padding: 8px; }
 
-.error-box{
-background:var(--danger);
-padding:15px;
-border-radius:10px;
-margin-bottom:15px;
-}
+    .info {
+      margin: 22px 0;
+      padding: 16px 18px;
+      border-left: 4px solid var(--gold);
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.16);
+    }
 
-.success{
-background:var(--success);
-padding:15px;
-border-radius:10px;
-margin-top:15px;
-}
+    .info h3 {
+      margin-bottom: 8px;
+      color: var(--gold);
+    }
 
-.info{
-border-left:4px solid var(--gold);
-padding-left:15px;
-margin:15px 0;
-}
+    .info p { margin: 4px 0; overflow-wrap: anywhere; }
 
-footer{
-margin-top:40px;
-text-align:center;
-opacity:.8;
-padding-bottom:40px;
-}
+    .form-button { width: 100%; margin-top: 4px; }
 
-</style>
+    .message {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 9px;
+    }
 
+    .error-box {
+      background: var(--danger);
+      color: white;
+    }
+
+    .success {
+      background: var(--success);
+      color: white;
+    }
+
+    .login-note {
+      margin-bottom: 18px;
+      color: var(--muted);
+    }
+
+    footer {
+      padding: 28px 12px 12px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 0.92rem;
+    }
+
+    @media (max-width: 600px) {
+      .container { width: min(100% - 24px, 1100px); padding-top: 12px; }
+      .hero { padding: 42px 8px 28px; }
+      .actions { flex-direction: column; }
+      .actions button { width: 100%; }
+      .card { padding: 20px 16px; }
+    }
+  </style>
 </head>
 
 <body>
-
-<div class="container">
-
-<div class="hero">
-
-<h1>PHILOCOURS IA</h1>
-
-<p>
-
-La philosophie intelligente au service
-de votre réussite scolaire.
-
-Plateforme ouverte de Septembre à Juillet,
-de 07h00 à 22h30.
-
-</p>
-
-<div class="actions">
-
-<button
-onclick="showSection('inscription')">
-
-📝 S'inscrire
-
-</button>
-
-<button
-onclick="showSection('connexion')">
-
-🔐 Se connecter
-
-</button>
-
-</div>
-
-</div>
-
-<!-- INSCRIPTION -->
-
-<div
-id="inscription"
-class="card hidden">
-
-<h2>Inscription</h2>
-
-<div id="errors"></div>
-
-<label>
-Nom
-<input id="nom">
-</label>
-
-<label>
-Prénom
-<input id="prenom">
-</label>
-
-<label>
-Sexe
-
-<select id="sexe">
-
-<option value="M">
-Masculin
-</option>
-
-<option value="F">
-Féminin
-</option>
-
-</select>
-
-</label>
-
-<label>
-Date de naissance
-<input
-type="date"
-id="date_naissance">
-</label>
-
-<label>
-Téléphone
-<input id="telephone">
-</label>
-
-<label>
-Email
-<input
-type="email"
-id="email">
-</label>
-
-<label>
-Classe
-
-<select id="classe">
-
-<option value="Premiere">
-Première
-</option>
-
-<option value="Terminale">
-Terminale
-</option>
-
-</select>
-
-</label>
-
-<label>
-Photo d'identité
-
-<input
-type="file"
-accept="image/*"
-id="photo">
-
-</label>
-
-<div class="info">
-
-<h3>Adhésion</h3>
-
-<p>
-Montant : 10 000 Ar / mois
-</p>
-
-<p>
-MVola :
-+261385528349
-</p>
-
-<p>
-Bénéficiaire :
-Nasandratriniaina Julio
-</p>
-
-<p>
-Référence obligatoire :
-PHILOCOURS
-</p>
-
-</div>
-
-<label>
-Référence utilisée
-
-<input
-id="reference"
-placeholder="PHILOCOURS">
-</label>
-
-<label>
-Numéro de transaction
-
-<input
-id="transaction">
-</label>
-
-<button
-onclick="inscrireEleve()">
-
-Valider mon inscription
-
-</button>
-
-<div id="success"></div>
-
-</div>
-
-<!-- CONNEXION -->
-
-<div
-id="connexion"
-class="card hidden">
-
-<h2>Connexion</h2>
-
-<p>
-
-Votre ticket doit être activé
-par l'administrateur avant
-la première connexion.
-
-</p>
-
-<br>
-
-<label>
-
-Ticket
-
-<input
-id="loginTicket"
-placeholder="PH-T-12345678">
-
-</label>
-
-<button
-onclick="connexion()">
-
-Se connecter
-
-</button>
-
-</div>
-
-<!-- TABLEAU DE BORD -->
-
-<div
-id="dashboard"
-class="card hidden">
-
-<h2>
-
-Bienvenue dans votre espace
-
-</h2>
-
-<br>
-
-<p>
-
-Nom :
-<span id="nomUtilisateur">
--
-</span>
-
-</p>
-
-<br>
-
-<div class="actions">
-
-<button>
-📚 Mes cours
-</button>
-
-<button>
-📂 Ressources
-</button>
-
-<button>
-📝 Exercices
-</button>
-
-<button>
-📊 Résultats
-</button>
-
-<button>
-👤 Profil
-</button>
-
-</div>
-
-</div>
-
-<footer>
-
-PHILOCOURS IA © 2026
-
-<br><br>
-
-Ouverture :
-07h00 - 22h30
-
-<br>
-
-Fermeture annuelle :
-Août
-
-</footer>
-
-</div>
-
-<script>
-
-function showSection(section){
-
-document
-.getElementById("inscription")
-.classList.add("hidden");
-
-document
-.getElementById("connexion")
-.classList.add("hidden");
-
-document
-.getElementById(section)
-.classList.remove("hidden");
-
-}
-
-async function connexion(){
-
-const ticket =
-document
-.getElementById(
-"loginTicket"
-)
-.value
-.trim();
-
-if(ticket===""){
-
-alert(
-"Veuillez saisir votre ticket."
-);
-
-return;
-
-}
-
-if(
-typeof loginEleve
-!== "function"
-){
-
-alert(
-"auth.js non chargé."
-);
-
-return;
-
-}
-
-const ok =
-await loginEleve(ticket);
-
-if(!ok){
-return;
-}
-
-const user =
-utilisateurCourant();
-
-if(user){
-
-document
-.getElementById(
-"nomUtilisateur"
-)
-.textContent =
-user.nom +
-" " +
-user.prenom;
-
-}
-
-// Après authentification, ouvrir le véritable espace élève.
-window.location.href = "dashboard-eleve.html";
-
-}
-
-</script>
-
-<!-- SUPABASE -->
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<!-- JS APP -->
-
-<script src="js/utils.js"></script>
-
-<script src="js/auth.js"></script>
-
-<script src="js/inscription.js"></script>
-
+  <main class="container">
+    <header class="hero">
+      <h1>PHILOCOURS IA</h1>
+      <p>
+        La philosophie intelligente au service de votre réussite scolaire.<br>
+        Plateforme ouverte de septembre à juillet, de 07h00 à 22h30.
+      </p>
+
+      <div class="actions" aria-label="Actions principales">
+        <button type="button" onclick="showSection('inscription')">📝 S'inscrire</button>
+        <button type="button" onclick="showSection('connexion')">🔐 Se connecter</button>
+      </div>
+    </header>
+
+    <!-- INSCRIPTION -->
+    <section id="inscription" class="card hidden" aria-labelledby="titre-inscription">
+      <h2 id="titre-inscription">Inscription</h2>
+      <div id="errors" aria-live="polite"></div>
+
+      <label for="nom">Nom
+        <input id="nom" name="nom" type="text" autocomplete="family-name">
+      </label>
+
+      <label for="prenom">Prénom
+        <input id="prenom" name="prenom" type="text" autocomplete="given-name">
+      </label>
+
+      <label for="sexe">Sexe
+        <select id="sexe" name="sexe">
+          <option value="M">Masculin</option>
+          <option value="F">Féminin</option>
+        </select>
+      </label>
+
+      <label for="date_naissance">Date de naissance
+        <input id="date_naissance" name="date_naissance" type="date" autocomplete="bday">
+      </label>
+
+      <label for="telephone">Téléphone
+        <input id="telephone" name="telephone" type="tel" autocomplete="tel">
+      </label>
+
+      <label for="email">Email
+        <input id="email" name="email" type="email" autocomplete="email">
+      </label>
+
+      <label for="classe">Classe
+        <select id="classe" name="classe">
+          <option value="Premiere">Première</option>
+          <option value="Terminale">Terminale</option>
+        </select>
+      </label>
+
+      <label for="photo">Photo d'identité
+        <input id="photo" name="photo" type="file" accept="image/*">
+      </label>
+
+      <div class="info">
+        <h3>Adhésion</h3>
+        <p><strong>Montant :</strong> 10 000 Ar / mois</p>
+        <p><strong>MVola :</strong> +261385528349</p>
+        <p><strong>Bénéficiaire :</strong> Nasandratriniaina Julio</p>
+        <p><strong>Référence obligatoire :</strong> PHILOCOURS</p>
+      </div>
+
+      <label for="reference">Référence utilisée
+        <input id="reference" name="reference" type="text" placeholder="PHILOCOURS" autocomplete="off">
+      </label>
+
+      <label for="transaction">Numéro de transaction
+        <input id="transaction" name="transaction" type="text" autocomplete="off">
+      </label>
+
+      <button class="form-button" type="button" onclick="soumettreInscription()">
+        Valider mon inscription
+      </button>
+      <div id="success" aria-live="polite"></div>
+    </section>
+
+    <!-- CONNEXION -->
+    <section id="connexion" class="card hidden" aria-labelledby="titre-connexion">
+      <h2 id="titre-connexion">Connexion</h2>
+      <p class="login-note">
+        Votre ticket doit être activé par l'administrateur avant votre première connexion.
+      </p>
+
+      <label for="loginTicket">Ticket
+        <input id="loginTicket" name="ticket" type="text" placeholder="PH-T-12345678" autocomplete="off" autocapitalize="characters">
+      </label>
+
+      <button class="form-button" type="button" onclick="connecterEleve()">
+        Se connecter
+      </button>
+    </section>
+
+    <footer>
+      PHILOCOURS IA © 2026<br><br>
+      Ouverture : 07h00 - 22h30<br>
+      Fermeture annuelle : août
+    </footer>
+  </main>
+
+  <script>
+    function showSection(sectionId) {
+      const sectionsAutorisees = ["inscription", "connexion"];
+      if (!sectionsAutorisees.includes(sectionId)) return;
+
+      sectionsAutorisees.forEach((id) => {
+        document.getElementById(id).classList.toggle("hidden", id !== sectionId);
+      });
+
+      document.getElementById(sectionId).scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    async function connecterEleve() {
+      const ticketInput = document.getElementById("loginTicket");
+      const ticket = ticketInput.value.trim();
+
+      if (!ticket) {
+        alert("Veuillez saisir votre ticket.");
+        ticketInput.focus();
+        return;
+      }
+
+      if (typeof window.loginEleve !== "function") {
+        alert("Le fichier js/auth.js n'est pas chargé ou la fonction loginEleve est introuvable.");
+        return;
+      }
+
+      try {
+        const connexionReussie = await window.loginEleve(ticket);
+        if (!connexionReussie) return;
+
+        // Le tableau de bord est une page séparée : on y accède après authentification.
+        window.location.assign("dashboard-eleve.html");
+      } catch (error) {
+        console.error("Erreur de connexion :", error);
+        alert("Une erreur est survenue pendant la connexion. Consultez la console du navigateur pour plus de détails.");
+      }
+    }
+
+    function soumettreInscription() {
+      if (typeof window.inscrireEleve !== "function") {
+        alert("Le fichier js/inscription.js n'est pas chargé ou la fonction inscrireEleve est introuvable.");
+        return;
+      }
+      window.inscrireEleve();
+    }
+  </script>
+
+  <!-- Charger Supabase avant les scripts de l'application. -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/inscription.js"></script>
 </body>
-
 </html>
