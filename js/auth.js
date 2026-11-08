@@ -1,11 +1,8 @@
 console.log("✅ AUTH.JS CHARGE");
-// =====================================================
-// PHILOCOURS IA
-// AUTH.JS
-// Connexion Supabase
-// =====================================================
 
-// Remplacez par vos informations Supabase
+// =====================================
+// SUPABASE
+// =====================================
 
 const SUPABASE_URL =
 "https://mwwzftnjetzaeesmrfxw.supabase.co";
@@ -13,23 +10,19 @@ const SUPABASE_URL =
 const SUPABASE_ANON_KEY =
 "sb_publishable_G6aD0xWT57oCgf-j9PAQeg_3wGZD0RI";
 
-// =====================================================
-// INITIALISATION
-// =====================================================
-
 const supabaseClient =
 supabase.createClient(
     SUPABASE_URL,
     SUPABASE_ANON_KEY
 );
 
-// =====================================================
-// TEST DE CONNEXION
-// =====================================================
+// =====================================
+// TEST
+// =====================================
 
-async function testConnexion() {
+async function testConnexion(){
 
-    try {
+    try{
 
         const { data, error } =
         await supabaseClient
@@ -38,36 +31,30 @@ async function testConnexion() {
         .limit(1);
 
         if(error){
-
-            console.error(
-                "Erreur Supabase :",
-                error
-            );
-
+            console.error(error);
             return false;
         }
 
-        console.log(
-            "Connexion Supabase OK"
-        );
+        console.log("✅ Supabase connecté");
 
         return true;
 
-    } catch(e){
+    }catch(err){
 
-        console.error(e);
+        console.error(err);
 
         return false;
     }
 }
 
-// =====================================================
-// RECHERCHE PAR TICKET
-// =====================================================
+// =====================================
+// RECHERCHE TICKET
+// =====================================
 
 async function rechercherTicket(ticket){
 
     const { data, error } =
+
     await supabaseClient
 
     .from("adhesions")
@@ -88,13 +75,14 @@ async function rechercherTicket(ticket){
     return data;
 }
 
-// =====================================================
+// =====================================
 // RECHERCHE UTILISATEUR
-// =====================================================
+// =====================================
 
 async function rechercherUtilisateur(id){
 
     const { data, error } =
+
     await supabaseClient
 
     .from("utilisateurs")
@@ -103,21 +91,21 @@ async function rechercherUtilisateur(id){
 
     .eq("id", id)
 
-    .single();
+    .single*);
 
     if(error){
 
-        console.error(error);
+        consol*.error(error);
 
-        return null;
+        return nul*;
     }
 
     return data;
 }
 
-// =====================================================
-// VERIFIER ACCES ELEVE
-// =====================================================
+// ==*==================================
+// CONTROLE D'ACCES
+// =====================================
 
 async function verifierAcces(ticket){
 
@@ -129,22 +117,6 @@ async function verifierAcces(ticket){
         return {
             autorise:false,
             message:"Ticket introuvable"
-        };
-    }
-
-    const aujourdHui =
-    new Date();
-
-    const expiration =
-    new Date(
-        adhesion.date_expiration
-    );
-
-    if(expiration < aujourdHui){
-
-        return {
-            autorise:false,
-            message:"Ticket expiré"
         };
     }
 
@@ -169,20 +141,23 @@ async function verifierAcces(ticket){
         return {
             autorise:false,
             message:
-            "Validation admin requise"
+            "En attente de validation administrateur."
         };
     }
 
     return {
+
         autorise:true,
+
         utilisateur,
+
         adhesion
     };
 }
 
-// =====================================================
-// LOGIN ELEVE
-// =====================================================
+// =====================================
+// LOGIN
+// =====================================
 
 async function loginEleve(ticket){
 
@@ -213,16 +188,16 @@ async function loginEleve(ticket){
     return true;
 }
 
-// =====================================================
-// UTILISATEUR CONNECTE
-// =====================================================
+// =====================================
+// SESSION
+// =====================================
 
 function utilisateurCourant(){
 
     const user =
-        sessionStorage.getItem(
-            "utilisateur"
-        );
+    sessionStorage.getItem(
+        "utilisateur"
+    );
 
     if(!user){
 
@@ -232,9 +207,9 @@ function utilisateurCourant(){
     return JSON.parse(user);
 }
 
-// =====================================================
-// DECONNEXION
-// =====================================================
+// =====================================
+// LOGOUT
+// =====================================
 
 function logout(){
 
@@ -244,7 +219,9 @@ function logout(){
     "index.html";
 }
 
-// Rendre les fonctions accessibles depuis HTML
+// =====================================
+// EXPORT GLOBAL
+// =====================================
 
 window.loginEleve =
 loginEleve;
@@ -257,5 +234,6 @@ utilisateurCourant;
 
 window.verifierAcces =
 verifierAcces;
+
 window.supabaseClient =
 supabaseClient;
