@@ -147,7 +147,18 @@ async function inscrireEleve(){
             error:userError
 
         } =
+console.log("URL :", SUPABASE_URL);
 
+const test =
+await supabaseClient
+.from("utilisateurs")
+.select("*")
+.limit(1);
+
+console.log(
+    "TEST UTILISATEURS",
+    test
+);
         await supabaseClient
 
         .from("utilisateurs")
