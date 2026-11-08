@@ -257,6 +257,5 @@ utilisateurCourant;
 
 window.verifierAcces =
 verifierAcces;
-
 window.supabaseClient =
 supabaseClient;
