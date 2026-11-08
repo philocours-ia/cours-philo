@@ -82,6 +82,9 @@ async function rechercherTicket(ticket){
 async function rechercherUtilisateur(id){
 
     const { data, error } =
+async function rechercherUtilisateur(id){
+
+    const { data, error } =
 
     await supabaseClient
 
@@ -95,9 +98,13 @@ async function rechercherUtilisateur(id){
 
     if(error){
 
-        consol*.error(error);
+        console.error(error);
 
-        return nul*;
+        return null;
+    }
+
+    return data;
+}
     }
 
     return data;
