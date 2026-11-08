@@ -242,18 +242,21 @@ function logout(){
 
     window.location.href =
     "index.html";
-function logout() {
-
-    sessionStorage.clear();
-
-    window.location.href =
-    "index.html";
 }
 
 // Rendre les fonctions accessibles depuis HTML
 
-window.loginEleve = loginEleve;
-window.logout = logout;
-window.utilisateurCourant = utilisateurCourant;
-window.verifierAcces = verifierAcces;
-console.log("FIN AUTH");
+window.loginEleve =
+loginEleve;
+
+window.logout =
+logout;
+
+window.utilisateurCourant =
+utilisateurCourant;
+
+window.verifierAcces =
+verifierAcces;
+
+window.supabaseClient =
+supabaseClient;
