@@ -1,0 +1,146 @@
+/* =====================================================
+   PHILOCOURS IA
+   STYLE.CSS
+   ===================================================== */
+
+:root{
+
+    --blue:#0D1B2A;
+    --blue2:#1B263B;
+
+    --gold:#D4AF37;
+
+    --white:#FFFFFF;
+
+    --success:#166534;
+
+    --danger:#991B1B;
+
+    --gray:#94A3B8;
+
+    --card:#1B263B;
+
+}
+
+/* =====================================================
+   RESET
+   ===================================================== */
+
+*{
+
+    margin:0;
+
+    padding:0;
+
+    box-sizing:border-box;
+
+}
+
+html{
+
+    scroll-behavior:smooth;
+}
+
+body{
+
+    font-family:'Inter',sans-serif;
+
+    background:linear-gradient(
+        135deg,
+        var(--blue),
+        var(--blue2)
+    );
+
+    color:var(--white);
+
+    min-height:100vh;
+}
+
+/* =====================================================
+   TYPOGRAPHIE
+   ===================================================== */
+
+h1,
+h2,
+h3,
+h4{
+
+    font-family:
+    'Playfair Display',
+    serif;
+}
+
+h1{
+
+    color:var(--gold);
+
+    margin-bottom:15px;
+}
+
+p{
+
+    line-height:1.7;
+}
+
+/* =====================================================
+   LAYOUT
+   ===================================================== */
+
+.container{
+
+    width:min(1200px,90%);
+
+    margin:auto;
+
+    padding:30px 0;
+}
+
+.section{
+
+    margin-bottom:25px;
+}
+
+/* =====================================================
+   HERO
+   ===================================================== */
+
+.hero{
+
+    text-align:center;
+
+    padding:60px 0;
+}
+
+/* =====================================================
+   CARDS
+   ===================================================== */
+
+.card{
+
+    background:
+    rgba(255,255,255,.08);
+
+    backdrop-filter:blur(10px);
+
+    border-radius:16px;
+
+    padding:25px;
+
+    margin-bottom:20px;
+
+    border:1px solid
+    rgba(255,255,255,.08);
+}
+
+.dashboard-card{
+
+    background:var(--card);
+
+    border-radius:15px;
+
+    padding:20px;
+}
+
+/* =====================================================
+   BUTTONS
+   ==========
