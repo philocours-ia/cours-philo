@@ -1,24 +1,6 @@
 console.log("✅ inscription.js chargé");
 
 // =====================================================
-// GENERATION TICKET
-// =====================================================
-
-function genererTicket(classe){
-
-    const numero =
-    Math.floor(
-        100000 + Math.random() * 900000
-    );
-
-    if(classe === "Premiere"){
-        return `PH-P-${numero}`;
-    }
-
-    return `PH-T-${numero}`;
-}
-
-// =====================================================
 // EMAIL
 // =====================================================
 
@@ -26,6 +8,59 @@ function emailValide(email){
 
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     .test(email);
+
+}
+
+// =====================================================
+// NORMALISATION
+// =====================================================
+
+function normaliserClasse(classe){
+
+    const valeur = classe.trim();
+
+    if(valeur === "Première" || valeur === "Premiere"){
+        return "Premiere";
+    }
+
+    if(valeur === "Terminale"){
+        return "Terminale";
+    }
+
+    return null;
+}
+
+function normaliserSexe(sexe){
+
+    const valeur = sexe.trim().toUpperCase();
+
+    if(["M", "HOMME", "MASCULIN"].includes(valeur)){
+        return "M";
+    }
+
+    if(["F", "FEMME", "FEMININ", "FÉMININ"].includes(valeur)){
+        return "F";
+    }
+
+    return null;
+}
+
+// =====================================================
+// AFFICHAGE ERREURS
+// =====================================================
+
+function afficherErreur(message){
+
+    const zone = document.getElementById("errors");
+
+    if(zone){
+
+        zone.innerHTML = `
+            <div class="error-box">
+                ${message}
+            </div>
+        `;
+    }
 }
 
 // =====================================================
@@ -34,47 +69,40 @@ function emailValide(email){
 
 async function inscrireEleve(){
 
-    console.log(
-        "✅ Bouton inscription cliqué"
-    );
+    console.log("✅ Bouton inscription cliqué");
 
     const erreurs = [];
 
     const nom =
-    document.getElementById("nom")
-    ?.value.trim();
+    document.getElementById("nom")?.value.trim();
 
     const prenom =
-    document.getElementById("prenom")
-    ?.value.trim();
+    document.getElementById("prenom")?.value.trim();
 
     const sexe =
-    document.getElementById("sexe")
-    ?.value;
+    normaliserSexe(
+        document.getElementById("sexe")?.value || ""
+    );
 
     const email =
-    document.getElementById("email")
-    ?.value.trim();
+    document.getElementById("email")?.value.trim().toLowerCase();
 
     const telephone =
-    document.getElementById("telephone")
-    ?.value.trim();
+    document.getElementById("telephone")?.value.trim();
 
     const dateNaissance =
-    document.getElementById("date_naissance")
-    ?.value;
+    document.getElementById("date_naissance")?.value;
 
     const classe =
-    document.getElementById("classe")
-    ?.value;
+    normaliserClasse(
+        document.getElementById("classe")?.value || ""
+    );
 
     const transaction =
-    document.getElementById("transaction")
-    ?.value.trim();
+    document.getElementById("transaction")?.value.trim();
 
     const reference =
-    document.getElementById("reference")
-    ?.value.trim();
+    document.getElementById("reference")?.value.trim();
 
     // =================================================
     // VALIDATIONS
@@ -86,311 +114,197 @@ async function inscrireEleve(){
     if(!prenom)
         erreurs.push("Prénom obligatoire");
 
-    if(!emailValide(email))
+    if(!sexe)
+        erreurs.push("Sexe invalide");
+
+    if(!email || !emailValide(email))
         erreurs.push("Email invalide");
 
     if(!telephone)
         erreurs.push("Téléphone obligatoire");
 
     if(!dateNaissance)
-        erreurs.push(
-            "Date de naissance obligatoire"
-        );
+        erreurs.push("Date de naissance obligatoire");
+
+    if(dateNaissance &&
+       !/^\d{4}-\d{2}-\d{2}$/.test(dateNaissance))
+        erreurs.push("Date de naissance invalide");
+
+    if(!classe)
+        erreurs.push("Classe invalide");
 
     if(!transaction)
-        erreurs.push(
-            "Numéro de transaction obligatoire"
-        );
+        erreurs.push("Numéro de transaction obligatoire");
 
     if(reference !== "PHILOCOURS")
-        erreurs.push(
-            "La référence doit être PHILOCOURS"
-        );
+        erreurs.push("Référence incorrecte");
 
     if(erreurs.length){
 
-        document.getElementById(
-            "errors"
-        ).innerHTML =
-
-        `
-        <div class="error-box">
-            ${erreurs.join("<br>")}
-        </div>
-        `;
+        afficherErreur(erreurs.join("<br>"));
 
         return;
     }
 
-    const ticket =
-    genererTicket(classe);
+    // =================================================
+    // VERIFICATION SUPABASE
+    // =================================================
 
-    console.log(
-        "🎫 Ticket généré :",
-        ticket
+    if(typeof supabaseClient === "undefined"){
+
+        afficherErreur(
+            "Connexion au serveur indisponible."
+        );
+
+        return;
+    }
+
+    // =================================================
+    // APPEL SERVEUR
+    // =================================================
+
+    const bouton = document.querySelector(
+        '[onclick="inscrireEleve()"]'
     );
+
+    if(bouton){
+
+        bouton.disabled = true;
+        bouton.textContent = "Inscription en cours...";
+    }
 
     try{
 
-        // =========================================
-        // UTILISATEUR
-        // =========================================
-
-        console.log(
-            "👤 Création utilisateur..."
-        );
-
-        console.log(
-            "URL :",
-            SUPABASE_URL
-        );
-
-        // =========================================
-        // CREATION DE L'UTILISATEUR
-        // =========================================
-
-        const {
-            data: userData,
-            error: userError
-        } = await supabaseClient
-
-            .from("utilisateurs")
-
-            .insert([{
-
-                nom,
-                prenom,
-                sexe,
-                email,
-                telephone,
-
-                date_naissance:
-                dateNaissance,
-
-                classe,
-
-                ticket_actuel:
-                ticket,
-
-                validation_admin:
-                false
-
-            }])
-
-            .select()
-
-            .single();
-
-        if(userError){
-
-            console.error(
-                "❌ USER ERROR",
-                userError
-            );
-
-            alert(
-                userError.message
-            );
-
-            return;
-        }
-
-        console.log(
-            "✅ Utilisateur créé",
-            userData
-        );
-
-        // =========================================
-        // TRANSACTION
-        // =========================================
-
-        console.log(
-            "💰 Création transaction..."
-        );
+        console.log("👤 Envoi de la demande...");
 
         const {
 
-            data: transactionData,
-            error: transactionError
+            data,
+            error
 
-        } = await supabaseClient
+        } = await supabaseClient.functions.invoke(
 
-            .from("transactions")
+            "inscrire-eleve",
 
-            .insert([{
+            {
 
-                utilisateur_id:
-                userData.id,
+                body: {
 
-                numero_transaction:
-                transaction,
+                    nom,
+                    prenom,
+                    sexe,
+                    email,
+                    telephone,
+                    date_naissance: dateNaissance,
+                    classe,
+                    transaction,
+                    reference
 
-                montant: 10000,
+                }
 
-                operateur: "MVOLA",
+            }
 
-                reference_paiement:
-                "PHILOCOURS",
+        );
 
-                date_transaction:
-                new Date()
-
-            }])
-
-            .select()
-
-            .single();
-
-        if(transactionError){
+        if(error){
 
             console.error(
-                "❌ TRANSACTION ERROR",
-                transactionError
+                "❌ ERREUR SERVEUR",
+                error
             );
 
-            alert(
-                transactionError.message
+            throw new Error(
+                error.message ||
+                "Impossible de traiter l'inscription."
             );
 
-            return;
         }
 
-        console.log(
-            "✅ Transaction créée",
-            transactionData
-        );
+        if(!data || !data.success){
 
-        // =========================================
-        // ADHESION
-        // =========================================
-
-        console.log(
-            "📄 Création adhésion..."
-        );
-
-        const dateDebut =
-        new Date();
-
-        const dateFin =
-        new Date();
-
-        dateFin.setDate(
-            dateFin.getDate() + 30
-        );
-
-        const {
-
-            data: adhesionData,
-            error: adhesionError
-
-        } = await supabaseClient
-
-            .from("adhesions")
-
-            .insert([{
-
-                utilisateur_id:
-                userData.id,
-
-                transaction_id:
-                transactionData.id,
-
-                ticket,
-
-                date_adhesion:
-                dateDebut,
-
-                date_expiration:
-                dateFin
-
-            }])
-
-            .select()
-
-            .single();
-
-        if(adhesionError){
-
-            console.error(
-                "❌ ADHESION ERROR",
-                adhesionError
+            throw new Error(
+                data?.error ||
+                "Échec de l'inscription."
             );
 
-            alert(
-                adhesionError.message
-            );
-
-            return;
         }
 
+        // =============================================
+        // SUCCÈS
+        // =============================================
+
         console.log(
-            "✅ Adhésion créée",
-            adhesionData
+            "✅ INSCRIPTION ENREGISTRÉE",
+            data
         );
 
-        // =========================================
-        // SUCCES
-        // =========================================
+        const zone = document.getElementById("success");
 
-        document.getElementById(
-            "success"
-        ).innerHTML =
+        if(zone){
 
-        `
-        <div class="success">
+            zone.innerHTML = `
 
-            ✅ Inscription enregistrée
+                <div class="success">
 
-            <br><br>
+                    ✅ Inscription enregistrée !
 
-            Ticket :
+                    <br><br>
 
-            <strong>
-            ${ticket}
-            </strong>
+                    Ticket :
 
-            <br><br>
+                    <strong>
+                        ${data.ticket}
+                    </strong>
 
-            Transaction :
+                    <br><br>
 
-            <strong>
-            ${transaction}
-            </strong>
+                    Transaction :
 
-            <br><br>
+                    <strong>
+                        ${transaction}
+                    </strong>
 
-            Votre demande est en attente
-            de validation administrateur.
+                    <br><br>
 
-            <br><br>
+                    Votre demande est en attente
+                    de validation administrateur.
 
-            Redirection vers
-            la connexion...
+                    <br><br>
 
-        </div>
-        `;
+                    Redirection vers la connexion...
+
+                </div>
+
+            `;
+
+        }
+
+        const zoneErreur =
+        document.getElementById("errors");
+
+        if(zoneErreur){
+            zoneErreur.innerHTML = "";
+        }
+
+        // =============================================
+        // REDIRECTION
+        // =============================================
 
         setTimeout(() => {
 
-            if(
-                typeof showSection
-                === "function"
-            ){
+            if(typeof showSection === "function"){
 
-                showSection(
-                    "connexion"
-                );
+                showSection("connexion");
+
             }
 
             const loginField =
-            document.getElementById(
-                "loginTicket"
-            );
+            document.getElementById("loginTicket");
 
             if(loginField){
 
-                loginField.value =
-                ticket;
+                loginField.value = data.ticket;
+
             }
 
         }, 3000);
@@ -404,23 +318,27 @@ async function inscrireEleve(){
             err
         );
 
-        alert(
-
-            err.message ||
-
-            JSON.stringify(
-                err,
-                null,
-                2
-            )
-
+        afficherErreur(
+            err.message
         );
+
     }
+
+    finally{
+
+        if(bouton){
+
+            bouton.disabled = false;
+            bouton.textContent = "Valider mon inscription";
+
+        }
+
+    }
+
 }
 
 // =====================================================
 // EXPORT GLOBAL
 // =====================================================
 
-window.inscrireEleve =
-inscrireEleve;
+window.inscrireEleve = inscrireEleve;
