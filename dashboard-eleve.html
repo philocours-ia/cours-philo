@@ -13,7 +13,7 @@ content="width=device-width,initial-scale=1.0">
 PHILOCOURS IA - Espace Élève
 </title>
 
-<link rel="stylesheet" href="css/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 
 <style>
 
@@ -196,6 +196,16 @@ display:inline-block;
 opacity:.6;
 
 padding:15px;
+}
+
+@media (max-width: 760px) {
+    body { display: block; }
+    .sidebar { width: 100%; padding: 16px; }
+    .menu { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .menu a { margin: 0; }
+    .content { padding: 18px; }
+    .header { align-items: flex-start; flex-direction: column; gap: 10px; }
+    table { display: block; overflow-x: auto; white-space: nowrap; }
 }
 
 </style>
@@ -543,62 +553,63 @@ async function(){
     ).textContent =
     user.email;
 
-    chargerCours();
-    chargerResultats();
+    document.getElementById("ticketEleve").textContent =
+        user.ticket || user.numero_ticket || "-";
+
+    await chargerCours();
+    await chargerResultats();
 
 });
 
 async function chargerCours(){
+    const tbody = document.getElementById("listeCours");
+    const total = document.getElementById("totalCours");
 
-    const tbody =
-    document.getElementById(
-        "listeCours"
-    );
+    try {
+        if (typeof supabaseClient === "undefined") {
+            throw new Error("Client Supabase indisponible. Vérifiez js/utils.js.");
+        }
 
-    const { data } =
-    await supabaseClient
+        const { data, error } = await supabaseClient
+            .from("cours")
+            .select("titre,niveau");
 
-    .from("cours")
+        if (error) throw error;
 
-    .select("*");
+        tbody.replaceChildren();
 
-    let html = "";
+        if (!data || data.length === 0) {
+            const tr = document.createElement("tr");
+            const td = document.createElement("td");
+            td.colSpan = 2;
+            td.textContent = "Aucun cours disponible pour le moment.";
+            tr.appendChild(td);
+            tbody.appendChild(tr);
+            total.textContent = "0";
+            return;
+        }
 
-    data?.forEach(cours => {
+        data.forEach(cours => {
+            const tr = document.createElement("tr");
+            const titre = document.createElement("td");
+            const niveau = document.createElement("td");
+            // textContent évite d'interpréter le contenu de la base comme du HTML.
+            titre.textContent = cours.titre || "Sans titre";
+            niveau.textContent = cours.niveau || "-";
+            tr.append(titre, niveau);
+            tbody.appendChild(tr);
+        });
 
-        html += `
-        <tr>
-
-        <td>
-        ${cours.titre}
-        </td>
-
-        <td>
-        ${cours.niveau}
-        </td>
-
-        </tr>
-        `;
-
-    });
-
-    tbody.innerHTML = html;
+        total.textContent = String(data.length);
+    } catch (error) {
+        console.error("Erreur de chargement des cours :", error);
+        tbody.innerHTML = '<tr><td colspan="2">Impossible de charger les cours.</td></tr>';
+    }
 }
 
 async function chargerResultats(){
-
-    const tbody =
-    document.getElementById(
-        "listeResultats"
-    );
-
-    tbody.innerHTML = `
-    <tr>
-        <td colspan="2">
-        Résultats bientôt disponibles
-        </td>
-    </tr>
-    `;
+    const tbody = document.getElementById("listeResultats");
+    tbody.innerHTML = '<tr><td colspan="2">Les résultats ne sont pas encore disponibles.</td></tr>';
 }
 
 </script>

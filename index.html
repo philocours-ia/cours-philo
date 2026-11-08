@@ -10,7 +10,7 @@ content="width=device-width, initial-scale=1.0">
 
 <title>PHILOCOURS IA</title>
 
-<link rel="stylesheet" href="css/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 
 <style>
 
@@ -493,19 +493,8 @@ user.prenom;
 
 }
 
-document
-.getElementById(
-"dashboard"
-)
-.classList.remove(
-"hidden"
-);
-
-window.scrollTo({
-top:
-document.body.scrollHeight,
-behavior:"smooth"
-});
+// Après authentification, ouvrir le véritable espace élève.
+window.location.href = "dashboard-eleve.html";
 
 }
 
