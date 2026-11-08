@@ -142,54 +142,51 @@ async function inscrireEleve(){
         );
 
         const {
+    data: userData,
+    error: userError
+} = await supabaseClient
 
-            data:userData,
-            error:userError
-
-        } =
-console.log("URL :", SUPABASE_URL);
-
-const test =
-await supabaseClient
 .from("utilisateurs")
-.select("*")
-.limit(1);
+
+.insert([{
+
+    nom,
+    prenom,
+    sexe,
+    email,
+    telephone,
+
+    date_naissance: dateNaissance,
+
+    classe,
+
+    ticket_actuel: ticket,
+
+    validation_admin: false
+
+}])
+
+.select()
+
+.single();
+
+
+if(userError){
+
+    console.error(
+        "❌ USER ERROR",
+        userError
+    );
+
+    alert(userError.message);
+
+    return;
+}
 
 console.log(
-    "TEST UTILISATEURS",
-    test
+    "✅ Utilisateur créé",
+    userData
 );
-        await supabaseClient
-
-        .from("utilisateurs")
-
-        .insert([{
-
-            nom,
-            prenom,
-            sexe,
-
-            email,
-
-            telephone,
-
-            date_naissance:
-            dateNaissance,
-
-            classe,
-
-            ticket_actuel:
-            ticket,
-
-            validation_admin:
-            false
-
-        }])
-
-        .select()
-
-        .single();
-
         if(userError){
 
             console.error(
